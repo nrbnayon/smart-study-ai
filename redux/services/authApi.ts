@@ -1,5 +1,5 @@
 // redux/services/authApi.ts
-import { apiSlice } from "./apiSlice";
+import { apiSlice } from "../features/apiSlice";
 
 interface SigninRequest {
   email: string;

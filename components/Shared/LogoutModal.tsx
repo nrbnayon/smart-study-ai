@@ -33,6 +33,7 @@ export default function LogoutModal({
           >
             <button
               onClick={onClose}
+              aria-label="Logout"
               className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
             >
               <X className="h-5 w-5 text-destructive" />

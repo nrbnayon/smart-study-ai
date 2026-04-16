@@ -1,5 +1,5 @@
 // redux/services/contactApi.ts
-import { apiSlice } from "./apiSlice";
+import { apiSlice } from "../features/apiSlice";
 
 export interface ContactMessage {
   _id: string;

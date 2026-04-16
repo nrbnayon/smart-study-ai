@@ -1,7 +1,7 @@
 // redux/services/apiSlice.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
-import { logout, updateTokens } from "../features/authSlice";
+import { logout, updateTokens } from "./authSlice";
 
 // Helper to clear cookies
 const clearAuthCookies = () => {

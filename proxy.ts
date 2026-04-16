@@ -48,8 +48,11 @@
  *  RATE_LIMIT_WINDOW_MS=60000
  *
  *  # Development only (.env.local)
- *  DEV_AUTH_BYPASS=true          # skips all auth checks in dev
+ *  DEV_AUTH_BYPASS=true          # skips all auth checks in dev (total bypass)
  *  DEV_BYPASS_ROLE=admin         # role to impersonate (admin | user)
+ *
+ *  # DUMMY CREDENTIALS (for testing login flow without backend)
+ *  # Email: admin@dev.com | Password: admin123
  *
  * ============================================================================
  */

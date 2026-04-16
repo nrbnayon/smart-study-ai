@@ -72,6 +72,53 @@ export const SignInForm = () => {
       password: data.password.trim(),
     };
 
+    // 🛠 Development bypass: Login with dummy credentials
+    if (
+      process.env.NODE_ENV === "development" &&
+      cleanData.email === "admin@dev.com" &&
+      cleanData.password === "admin123"
+    ) {
+      toast.info("Dev Mode: Bypassing authentication...");
+      const dummyResponse = {
+        accessToken: "dev-bypass-token",
+        refreshToken: "dev-bypass-refresh-token",
+        role: "admin",
+        email: "admin@dev.com",
+        name: "Dev Admin",
+        permissions: ["admin", "read", "write"],
+      };
+
+      const maxAgeSeconds = cleanData.rememberMe ? 7 * 24 * 60 * 60 : undefined;
+      setClientCookie("accessToken", dummyResponse.accessToken, maxAgeSeconds);
+      setClientCookie("userRole", dummyResponse.role, maxAgeSeconds);
+      setClientCookie("userEmail", dummyResponse.email, maxAgeSeconds);
+      setClientCookie("userName", dummyResponse.name, maxAgeSeconds);
+      setClientCookie(
+        "userPermissions",
+        JSON.stringify(dummyResponse.permissions),
+        maxAgeSeconds,
+      );
+      setClientCookie("authSession", "1", maxAgeSeconds);
+
+      dispatch(
+        setCredentials({
+          user: {
+            name: dummyResponse.name,
+            email: dummyResponse.email,
+            role: dummyResponse.role,
+            permissions: dummyResponse.permissions,
+            avatar: "/images/avatar.png",
+          },
+          accessToken: dummyResponse.accessToken,
+          refreshToken: dummyResponse.refreshToken,
+        }),
+      );
+
+      toast.success("Logged in successfully (Dev Bypass)!");
+      router.push("/dashboard");
+      return;
+    }
+
     try {
       const response = await signin(cleanData).unwrap();
 
@@ -269,6 +316,25 @@ export const SignInForm = () => {
             Sign up
           </Link>
         </div>
+
+        {process.env.NODE_ENV === "development" && (
+          <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-2xl">
+            <p className="text-sm font-semibold text-primary mb-2">Dev Helpers:</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              onClick={() => {
+                setValue("email", "admin@dev.com", { shouldValidate: true });
+                setValue("password", "admin123", { shouldValidate: true });
+                handleSubmit(onSubmit)();
+              }}
+            >
+              Quick Dev Login (admin@dev.com)
+            </Button>
+          </div>
+        )}
       </form>
     </motion.div>
   );

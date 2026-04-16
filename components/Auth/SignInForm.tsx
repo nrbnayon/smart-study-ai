@@ -16,21 +16,58 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 import { useAppDispatch } from "@/redux/hooks";
-import { setCredentials } from "@/redux/features/authSlice";
-import { useSigninMutation } from "@/redux/services/authApi";
+import {
+  setCredentials,
+  logout as logoutAction,
+} from "@/redux/features/authSlice";
+import {
+  useSigninMutation,
+  useLogoutMutation,
+  useLazyGetCurrentUserQuery,
+} from "@/redux/services/authApi";
 import { toast } from "sonner";
 import { signinValidationSchema } from "@/lib/formDataValidation";
-import { setAuthCookies } from "@/lib/authCookies";
+import { clearAuthCookies, setAuthCookies } from "@/lib/authCookies";
 
 type FormValues = z.infer<typeof signinValidationSchema>;
+
+const extractMeProfile = (meResponse: unknown) => {
+  const root =
+    meResponse && typeof meResponse === "object"
+      ? (meResponse as Record<string, unknown>)
+      : {};
+  const data =
+    root.data && typeof root.data === "object"
+      ? (root.data as Record<string, unknown>)
+      : root;
+
+  const permissionsRaw = data.permissions;
+  const permissions = Array.isArray(permissionsRaw)
+    ? permissionsRaw.filter((item): item is string => typeof item === "string")
+    : [];
+
+  return {
+    name: typeof data.name === "string" ? data.name : "User",
+    email: typeof data.email === "string" ? data.email : "",
+    role: typeof data.role === "string" ? data.role : "",
+    avatar: typeof data.avatar === "string" ? data.avatar : null,
+    permissions,
+  };
+};
 
 export const SignInForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [signin, { isLoading }] = useSigninMutation();
+  const [logoutBackend] = useLogoutMutation();
+  const [fetchCurrentUser] = useLazyGetCurrentUserQuery();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
+  const safeRedirect =
+    redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+      ? redirect
+      : null;
   const {
     register,
     handleSubmit,
@@ -106,13 +143,64 @@ export const SignInForm = () => {
 
     try {
       const response = await signin(cleanData).unwrap();
+      const normalizedRole = String(response.role || "").toLowerCase();
 
-      const userPayload = {
+      if (normalizedRole !== "admin") {
+        try {
+          await logoutBackend().unwrap();
+        } catch {
+          // If backend logout fails, still clear client-side auth state.
+        }
+
+        clearAuthCookies();
+        dispatch(logoutAction());
+        toast.error("Access denied. Only admin users can log in.");
+        return;
+      }
+
+      let meProfile = {
         name: response.name || "User",
         email: response.email,
-        role: response.role,
-        permissions: response.permissions,
-        image: "/images/avatar.png",
+        role: normalizedRole,
+        avatar: response.avatar || "/images/avatar.png",
+        permissions: response.permissions || [],
+      };
+
+      try {
+        const meResponse = await fetchCurrentUser().unwrap();
+        const extracted = extractMeProfile(meResponse);
+        meProfile = {
+          name: extracted.name || meProfile.name,
+          email: extracted.email || meProfile.email,
+          role: (extracted.role || meProfile.role).toLowerCase(),
+          avatar: extracted.avatar || meProfile.avatar,
+          permissions: extracted.permissions.length
+            ? extracted.permissions
+            : meProfile.permissions,
+        };
+      } catch {
+        // Keep login payload fallback when /me fetch fails.
+      }
+
+      if (meProfile.role !== "admin") {
+        try {
+          await logoutBackend().unwrap();
+        } catch {
+          // Ensure cleanup even if backend logout fails.
+        }
+
+        clearAuthCookies();
+        dispatch(logoutAction());
+        toast.error("Access denied. Only admin users can log in.");
+        return;
+      }
+
+      const userPayload = {
+        name: meProfile.name,
+        email: meProfile.email,
+        role: meProfile.role,
+        permissions: meProfile.permissions,
+        avatar: meProfile.avatar,
       };
 
       dispatch(
@@ -124,12 +212,7 @@ export const SignInForm = () => {
       );
 
       toast.success("Logged in successfully!");
-
-      if (userPayload.role === "user") {
-        router.push(redirect || "/");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push(safeRedirect || "/dashboard");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Signin error:", error);

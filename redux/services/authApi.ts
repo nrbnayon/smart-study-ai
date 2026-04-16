@@ -156,7 +156,7 @@ export const authApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
-    // Get current user - profile
+    // Get current user - profile (it can be profile, me, get user, etc. depending on your backend)
     getCurrentUser: builder.query<unknown, void>({
       query: () => "/auth/me",
       providesTags: ["Auth"],
@@ -173,4 +173,5 @@ export const {
   useResetPasswordMutation,
   useLogoutMutation,
   useGetCurrentUserQuery,
+  useLazyGetCurrentUserQuery,
 } = authApi;

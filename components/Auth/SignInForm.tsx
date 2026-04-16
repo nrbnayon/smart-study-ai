@@ -76,7 +76,6 @@ export const SignInForm = () => {
         permissions: ["admin", "read", "write"],
       };
 
-      const maxAgeSeconds = cleanData.rememberMe ? 7 * 24 * 60 * 60 : undefined;
       setAuthCookies(
         {
           accessToken: dummyResponse.accessToken,
@@ -84,7 +83,6 @@ export const SignInForm = () => {
           userRole: dummyResponse.role,
           userEmail: dummyResponse.email,
         },
-        { maxAgeSeconds },
       );
 
       dispatch(
@@ -108,17 +106,6 @@ export const SignInForm = () => {
 
     try {
       const response = await signin(cleanData).unwrap();
-
-      const maxAgeSeconds = cleanData.rememberMe ? 7 * 24 * 60 * 60 : undefined;
-      setAuthCookies(
-        {
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-          userRole: response.role,
-          userEmail: response.email,
-        },
-        { maxAgeSeconds },
-      );
 
       const userPayload = {
         name: response.name || "User",

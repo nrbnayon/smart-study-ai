@@ -273,18 +273,6 @@ function LoginView({
         }),
       );
 
-      persistAuthCookies(
-        {
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          userRole: result.role,
-          userEmail: result.email,
-        },
-        {
-          maxAgeSeconds: formData.rememberMe ? 7 * 24 * 60 * 60 : undefined,
-        },
-      );
-
       toast.success("Welcome back!");
       onClose();
 

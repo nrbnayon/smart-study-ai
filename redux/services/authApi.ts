@@ -10,11 +10,29 @@ interface SigninRequest {
 interface SigninResponse {
   name: string;
   email: string;
-  role: string | "admin" | "user";
+  role: string;
   avatar?: string | null;
   permissions?: string[];
   accessToken: string;
   refreshToken: string;
+}
+
+type SigninProfileFields = Pick<
+  SigninResponse,
+  "name" | "email" | "avatar" | "permissions"
+>;
+
+interface SigninApiData extends Partial<SigninProfileFields> {
+  access_token: string;
+  refresh_token: string;
+  user_role: string;
+}
+
+interface SigninApiResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data: SigninApiData;
 }
 
 interface SignupRequest {
@@ -70,6 +88,19 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      transformResponse: (response: SigninApiResponse): SigninResponse => {
+        const payload = response?.data;
+
+        return {
+          accessToken: payload?.access_token || "",
+          refreshToken: payload?.refresh_token || "",
+          role: payload?.user_role || "user",
+          name: payload?.name || "User",
+          email: payload?.email || "",
+          avatar: payload?.avatar ?? null,
+          permissions: payload?.permissions || [],
+        };
+      },
       invalidatesTags: ["Auth"],
     }),
 

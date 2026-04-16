@@ -1,0 +1,19 @@
+{
+  "extends": [
+    "development"
+  ],
+  "hints": {
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "scrollbar-width",
+          "scrollbar-width: none",
+          "scrollbar-color",
+          "text-wrap",
+          "text-wrap: balance"
+        ]
+      }
+    ]
+  }
+}

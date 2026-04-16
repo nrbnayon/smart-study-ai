@@ -14,26 +14,16 @@ export interface AuthCookiePayload {
   userEmail?: string | null;
 }
 
-interface CookieOptions {
-  maxAgeSeconds?: number;
-}
-
 const getSecureFlag = () =>
   process.env.NODE_ENV === "production" ? "; Secure" : "";
 
 const setClientCookie = (
   key: AuthCookieKey,
   value: string,
-  options?: CookieOptions,
 ) => {
   if (typeof document === "undefined") return;
 
-  const maxAgePart =
-    typeof options?.maxAgeSeconds === "number"
-      ? `; Max-Age=${options.maxAgeSeconds}`
-      : "";
-
-  document.cookie = `${key}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${getSecureFlag()}${maxAgePart}`;
+  document.cookie = `${key}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${getSecureFlag()}`;
 };
 
 const removeClientCookie = (key: AuthCookieKey) => {
@@ -52,12 +42,9 @@ export const getClientCookie = (key: AuthCookieKey): string | null => {
   return raw ? decodeURIComponent(raw) : null;
 };
 
-export const setAuthCookies = (
-  payload: AuthCookiePayload,
-  options?: CookieOptions,
-) => {
+export const setAuthCookies = (payload: AuthCookiePayload) => {
   if (payload.accessToken) {
-    setClientCookie(AUTH_COOKIE_KEYS.accessToken, payload.accessToken, options);
+    setClientCookie(AUTH_COOKIE_KEYS.accessToken, payload.accessToken);
   } else {
     removeClientCookie(AUTH_COOKIE_KEYS.accessToken);
   }
@@ -66,20 +53,19 @@ export const setAuthCookies = (
     setClientCookie(
       AUTH_COOKIE_KEYS.refreshToken,
       payload.refreshToken,
-      options,
     );
   } else {
     removeClientCookie(AUTH_COOKIE_KEYS.refreshToken);
   }
 
   if (payload.userRole) {
-    setClientCookie(AUTH_COOKIE_KEYS.userRole, payload.userRole, options);
+    setClientCookie(AUTH_COOKIE_KEYS.userRole, payload.userRole);
   } else {
     removeClientCookie(AUTH_COOKIE_KEYS.userRole);
   }
 
   if (payload.userEmail) {
-    setClientCookie(AUTH_COOKIE_KEYS.userEmail, payload.userEmail, options);
+    setClientCookie(AUTH_COOKIE_KEYS.userEmail, payload.userEmail);
   } else {
     removeClientCookie(AUTH_COOKIE_KEYS.userEmail);
   }

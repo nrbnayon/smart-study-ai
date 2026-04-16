@@ -181,12 +181,6 @@
     margin-inline: auto;
   }
 
-  .hero-bg {
-    background-image: linear-gradient(to bottom, #11264099, #11264099), url('/images/hero_bg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
 
   /* Scrollbar Utilities */
   .scrollbar-hide, .scrollbar-none {

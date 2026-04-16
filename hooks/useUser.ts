@@ -11,7 +11,7 @@ import {
   selectIsAuthenticated,
 } from "@/redux/features/authSlice";
 import { useLogoutMutation } from "@/redux/services/authApi";
-import { clearAuthCookies, readAuthCookies, setAuthCookies } from "@/lib/authCookies";
+import { clearAuthCookies, readAuthCookies } from "@/lib/authCookies";
 
 export interface UserInfo {
   name: string | null;
@@ -69,12 +69,6 @@ export function useUser() {
 
             if (effectiveAccessToken) {
               dispatch(updateTokens({ accessToken: effectiveAccessToken }));
-              setAuthCookies({
-                accessToken: effectiveAccessToken,
-                refreshToken,
-                userRole,
-                userEmail,
-              });
             }
           }
         } catch {

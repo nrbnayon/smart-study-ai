@@ -1,4 +1,4 @@
-// redux/services/apiSlice.ts
+// redux/features/apiSlice.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
 import { logout, updateTokens } from "./authSlice";
@@ -74,7 +74,7 @@ const baseQueryWithReauth: typeof baseQuery = async (
           const refreshResult = await baseQuery(
             { url: "/auth/refresh", method: "POST" },
             api,
-            extraOptions
+            extraOptions,
           );
 
           if (refreshResult.data) {
@@ -86,7 +86,7 @@ const baseQueryWithReauth: typeof baseQuery = async (
                 updateTokens({
                   accessToken: newAccessToken,
                   tokenExpiresAt: responseData.expires_at,
-                })
+                }),
               );
               return true;
             }
@@ -123,15 +123,7 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   // Define tag types for cache invalidation
-  tagTypes: [
-    "User", "Auth", "Dashboard", "Profile", "Settings", "AuditLogs",
-    // BassInsight domain
-    "Lakes", "LakeReviews", "LakeReports",
-    "BassPorn", "MyCatches", "FavouriteCatches",
-    "Reports", "MyReports",
-    "Comments",
-    "Contact", "MyContacts",
-  ],
+  tagTypes: ["User", "Auth", "Dashboard", "Profile"],
   // Define endpoints in separate files and inject them here
   endpoints: () => ({}),
 });

@@ -132,7 +132,6 @@ export const SignInForm = () => {
             avatar: "/images/avatar.png",
           },
           accessToken: dummyResponse.accessToken,
-          refreshToken: dummyResponse.refreshToken,
         }),
       );
 
@@ -207,7 +206,6 @@ export const SignInForm = () => {
         setCredentials({
           user: userPayload,
           accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
         }),
       );
 

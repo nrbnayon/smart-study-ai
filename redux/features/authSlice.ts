@@ -15,8 +15,8 @@ export interface User {
 interface AuthState {
   user: User | null;
   accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
+  isHydrated: boolean;
 }
 
 
@@ -24,8 +24,8 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   accessToken: null,
-  refreshToken: null,
   isAuthenticated: false,
+  isHydrated: false,
 };
 
 
@@ -36,22 +36,25 @@ export const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ user: User; accessToken: string; refreshToken?: string }>
+      action: PayloadAction<{ user: User; accessToken: string }>
     ) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken || null;
       state.isAuthenticated = true;
     },
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
-      state.refreshToken = null;
       state.isAuthenticated = false;
+      state.isHydrated = true;
     },
 
     updateTokens: (state, action: PayloadAction<{ accessToken: string; tokenExpiresAt?: number }>) => {
       state.accessToken = action.payload.accessToken;
+    },
+
+    setHydrated: (state, action: PayloadAction<boolean>) => {
+      state.isHydrated = action.payload;
     },
 
     // Sync profile changes (name, avatar, phone, location) into auth state
@@ -66,7 +69,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logout, updateTokens, updateProfile } = authSlice.actions;
+export const { setCredentials, logout, updateTokens, updateProfile, setHydrated } = authSlice.actions;
 
 export default authSlice.reducer;
 
@@ -75,3 +78,4 @@ export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectCurrentToken = (state: RootState) => state.auth.accessToken;
 
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectIsHydrated = (state: RootState) => state.auth.isHydrated;

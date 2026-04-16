@@ -269,7 +269,6 @@ function LoginView({
             permissions: result.permissions,
           },
           accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
         }),
       );
 

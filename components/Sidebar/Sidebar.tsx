@@ -33,7 +33,7 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
 
   // State management
   const [open, setOpen] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(250);
+  const [sidebarWidth, setSidebarWidth] = useState(240);
   const [isResizing, setIsResizing] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startWidth, setStartWidth] = useState(0);
@@ -484,7 +484,15 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
               {/* User Profile */}
               <div className="mt-4 pt-4 border-t border-[#222A4D]">
                 <div className="flex items-center gap-3 px-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <Link
+                    href="/settings"
+                    onClick={() => {
+                      if (window.innerWidth < 768) {
+                        setOpen(false);
+                      }
+                    }}
+                    className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-85 transition-opacity"
+                  >
                     <div className="relative w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center shrink-0 overflow-hidden">
                       {avatar ? (
                         <Image
@@ -518,7 +526,7 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
                         {getRoleDisplayName(role || "customer")}
                       </p>
                     </motion.div>
-                  </div>
+                  </Link>
                   <motion.button
                     onClick={handleLogoutClick}
                     animate={{
@@ -599,7 +607,7 @@ const Logo = ({ open }: { open: boolean }) => {
 
 const Dashboard = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-1 bg-[#0F1430] min-w-0">
+    <div className="flex flex-1 bg-background min-w-0">
       <div className="p-0 flex flex-col gap-2 flex-1 w-full md:h-screen md:overflow-y-auto overflow-x-hidden">
         {children}
       </div>

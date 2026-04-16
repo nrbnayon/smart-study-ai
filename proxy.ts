@@ -181,6 +181,11 @@ const ROLE_ROUTES: Record<Role, string[]> = {
   [ROLES.ADMIN]: [
     "/", // app/(roles)/
     "/dashboard", // app/(roles)/dashboard
+    "/users",
+    "/subscriptions",
+    "/analytics",
+    "/settings",
+    "/terms-conditions",
   ],
 
   // ── User pages ─────────────────────────────────────────────────────────────

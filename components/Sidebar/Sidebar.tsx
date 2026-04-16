@@ -484,19 +484,11 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
               {/* User Profile */}
               <div className="mt-4 pt-4 border-t border-[#222A4D]">
                 <div className="flex items-center gap-3 px-3">
-                  <Link
-                    href="/admin/settings"
-                    onClick={() => {
-                      if (window.innerWidth < 768) {
-                        setOpen(false);
-                      }
-                    }}
-                    className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity"
-                  >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="relative w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center shrink-0 overflow-hidden">
                       {avatar ? (
                         <Image
-                            src={resolveMediaUrl(avatar) || "/images/avatar.png"}
+                          src={resolveMediaUrl(avatar) || "/images/avatar.png"}
                           alt={name || "User"}
                           fill
                           className="object-cover"
@@ -526,7 +518,7 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
                         {getRoleDisplayName(role || "customer")}
                       </p>
                     </motion.div>
-                  </Link>
+                  </div>
                   <motion.button
                     onClick={handleLogoutClick}
                     animate={{

@@ -1,13 +1,12 @@
 import type React from "react";
 import type { IconSvgElement } from "@hugeicons/react";
-import { Bell, FileText, ShieldCheck, Fish } from "lucide-react";
+import { FileText } from "lucide-react";
 import {
   DashboardSquare02Icon,
   Settings01Icon,
   UserMultiple03Icon,
   Analytics01Icon,
-  Image03Icon,
-  Mail02Icon,
+  CreditCardIcon,
 } from "@hugeicons/core-free-icons";
 
 export interface SidebarSubLink {
@@ -20,6 +19,7 @@ export interface SidebarLink {
   label: string;
   href: string;
   icon: React.ElementType | React.ReactElement | IconSvgElement;
+  section?: "main" | "system";
   subLinks?: SidebarSubLink[];
   permission?: string;
 }
@@ -29,54 +29,42 @@ export const sidebarLinks: SidebarLink[] = [
     label: "Dashboard",
     href: "/admin/dashboard",
     icon: DashboardSquare02Icon,
-    permission: "view_dashboard", // Anyone with view_dashboard atom
+    section: "main",
+    permission: "admin",
   },
   {
-    label: "Users",
+    label: "User Management",
     href: "/admin/users",
     icon: UserMultiple03Icon,
+    section: "main",
+    permission: "admin",
   },
   {
-    label: "Lakes",
-    href: "/admin/lakes",
-    icon: Fish,
+    label: "Subscriptions",
+    href: "/admin/subscriptions",
+    icon: CreditCardIcon,
+    section: "main",
+    permission: "admin",
   },
-  {
-    label: "Reports",
-    href: "/admin/reports",
-    icon: FileText,
-  },
-  {
-    label: "BassPorn Requests",
-    href: "/admin/bassporn-requests",
-    icon: Image03Icon,
-  },
-
   {
     label: "Analytics",
     href: "/admin/analytics",
     icon: Analytics01Icon,
-  },
-
-  {
-    label: "Contact Us",
-    href: "/admin/contact-us",
-    icon: Mail02Icon,
+    section: "main",
+    permission: "admin",
   },
   {
-    label: "Audit Logs",
-    href: "/admin/audit-logs",
-    icon: Bell,
-  },
-  {
-    label: "Privacy & policy",
-    href: "/admin/privacy-policy",
-    icon: ShieldCheck,
-  },
-  {
-    label: "Settings",
+    label: "Profile Settings",
     href: "/admin/settings",
     icon: Settings01Icon,
-    permission: "customer",
+    section: "system",
+    permission: "admin",
+  },
+  {
+    label: "Terms & Conditions",
+    href: "/admin/terms-conditions",
+    icon: FileText,
+    section: "system",
+    permission: "admin",
   },
 ];

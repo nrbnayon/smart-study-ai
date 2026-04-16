@@ -29,6 +29,7 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
   // Use centralized user hook
   const { name, role, avatar, hasPermission, isAuthenticated, logout } =
     useUser();
+  const isAdmin = role?.toLowerCase() === "admin";
 
   // State management
   const [open, setOpen] = useState(true);
@@ -49,13 +50,15 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
 
   // Filter links based on user permissions
   const filteredLinks = useMemo(() => {
+    if (!isAdmin) return [];
+
     return sidebarLinks.filter((link) => {
       // If no permission defined, everyone sees it
       if (!link.permission) return true;
       // Admin sees everything via hasPermission logic, or user needs the right atom
       return hasPermission(link.permission);
     });
-  }, [hasPermission]);
+  }, [hasPermission, isAdmin]);
 
   // Check if current path matches link
   const isLinkActive = useCallback(
@@ -194,8 +197,8 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
       const iconClasses = cn(
         "h-6 w-6 shrink-0 transition-colors duration-200",
         isActive
-          ? "text-white font-semibold"
-          : "text-foreground group-hover:text-foreground font-semibold",
+          ? "text-[#7A87FF] font-semibold"
+          : "text-[#8F9AB8] group-hover:text-[#D2D9EC] font-semibold",
       );
 
       // 1. If it's a valid React Element (pre-rendered JSX like <Bell />)
@@ -293,7 +296,7 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
   return (
     <div
       className={cn(
-        "rounded-md flex flex-col md:flex-row bg-gray w-full flex-1 mx-auto",
+        "rounded-md flex flex-col md:flex-row bg-[#0F1430] w-full flex-1 mx-auto",
         "min-h-screen md:h-screen md:overflow-hidden relative",
       )}
     >
@@ -307,11 +310,11 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
           <SidebarBody
             className={cn(
               "justify-between gap-10 border-0.5",
-              "bg-white text-foreground",
+              "bg-[#121833] text-[#95A0BD]",
             )}
           >
             <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-              <div className="flex items-center justify-center my-6">
+              <div className="flex items-center justify-center my-6 pb-5 border-b border-[#222A4D]">
                 <Logo open={open} />
               </div>
 
@@ -354,6 +357,17 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
                         }
                       }}
                     >
+                      {open &&
+                        link.section === "system" &&
+                        idx > 0 &&
+                        filteredLinks[idx - 1]?.section !== "system" && (
+                          <div className="pt-4 mt-4 border-t border-[#222A4D]">
+                            <p className="px-3 pb-3 text-xs font-semibold tracking-[0.12em] text-[#5D6887]">
+                              SYSTEM
+                            </p>
+                          </div>
+                        )}
+
                       {/* Main Link */}
                       <div className="flex items-center relative">
                         <Link
@@ -364,12 +378,15 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
                             }
                           }}
                           className={cn(
-                            "flex items-center gap-3 p-3 rounded-md transition-all duration-200 group flex-1 relative",
+                            "flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 group flex-1 relative",
                             isActive
-                              ? "bg-primary text-white font-semibold"
-                              : "hover:text-foreground hover:bg-primary/30",
+                              ? "bg-[#2B315D] text-[#7A87FF] font-semibold"
+                              : "hover:text-[#D2D9EC] hover:bg-[#1C2349]",
                           )}
                         >
+                          {isActive && (
+                            <span className="absolute left-0 top-1/2 h-9 w-0.5 -translate-y-1/2 rounded-full bg-[#7A87FF]" />
+                          )}
                           <span className="shrink-0">
                             {renderIcon(link.icon, isActive)}
                           </span>
@@ -392,8 +409,8 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
                                 toggleExpanded(link.label);
                               }}
                               className={cn(
-                                "p-1 rounded transition-all duration-200 hover:bg-gray-200",
-                                isActive && "text-white",
+                                "p-1 rounded transition-all duration-200 hover:bg-[#3A4479]",
+                                isActive && "text-[#7A87FF]",
                               )}
                             >
                               {isExpanded ? (
@@ -444,8 +461,8 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
                                 className={cn(
                                   "flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 text-sm",
                                   isSubLinkActive
-                                    ? "bg-gradient-purple text-white font-semibold"
-                                    : "text-secondary hover:text-primary hover:bg-gray-50",
+                                    ? "bg-[#2B315D] text-[#7A87FF] font-semibold"
+                                    : "text-[#95A0BD] hover:text-[#D2D9EC] hover:bg-[#1C2349]",
                                 )}
                               >
                                 <span className="text-sm whitespace-pre">
@@ -465,7 +482,7 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
             {/* Bottom Section */}
             <div>
               {/* User Profile */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-[#222A4D]">
                 <div className="flex items-center gap-3 px-3">
                   <Link
                     href="/admin/settings"
@@ -528,25 +545,25 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
 
         {/* Resizable Border */}
         <div
-          className="hidden md:block w-1 bg-white cursor-col-resize border-r border-gray-200 hover:bg-blue-500/20 transition-colors duration-200 relative group"
+          className="hidden md:block w-1 bg-[#121833] cursor-col-resize border-r border-[#222A4D] hover:bg-[#5964A8]/30 transition-colors duration-200 relative group"
           onMouseDown={handleMouseDown}
         >
           <div className="absolute inset-0 w-2 -ml-0.5 bg-transparent" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-gray-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-[#56608F] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         </div>
 
         {/* Toggle Button */}
         <button
           onClick={handleToggleClick}
           className={cn(
-            "absolute hidden md:flex top-4 z-20 cursor-pointer p-2 rounded-full bg-gray border border-gray-300 shadow-none hover:bg-gray-50 transition-all duration-200",
+            "absolute hidden md:flex top-4 z-20 cursor-pointer p-2 rounded-full bg-[#121833] border border-[#222A4D] shadow-none hover:bg-[#1C2349] transition-all duration-200",
             open ? "-right-4" : "-right-4",
           )}
         >
           {open ? (
-            <PanelRightOpen className="h-4 w-4 text-secondary" />
+            <PanelRightOpen className="h-4 w-4 text-[#8E99B9]" />
           ) : (
-            <PanelLeftOpen className="h-4 w-4 text-secondary" />
+            <PanelLeftOpen className="h-4 w-4 text-[#8E99B9]" />
           )}
         </button>
       </div>
@@ -568,7 +585,7 @@ const Logo = ({ open }: { open: boolean }) => {
     <div className="font-normal flex items-center text-sm relative z-20 w-full justify-center">
       <motion.div
         animate={{
-          width: open ? "120px" : "40px",
+          width: open ? "185px" : "40px",
           height: open ? "auto" : "40px",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -577,8 +594,8 @@ const Logo = ({ open }: { open: boolean }) => {
         <Image
           className="w-full h-auto object-contain"
           alt="Logo"
-          src="/icons/logo1.png"
-          width={open ? 120 : 40}
+          src="/icons/logo.svg"
+          width={open ? 128 : 40}
           height={40} // Default height placeholder
           style={{ height: "auto" }}
           priority
@@ -590,7 +607,7 @@ const Logo = ({ open }: { open: boolean }) => {
 
 const Dashboard = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-1 bg-gray min-w-0">
+    <div className="flex flex-1 bg-[#0F1430] min-w-0">
       <div className="p-0 flex flex-col gap-2 flex-1 w-full md:h-screen md:overflow-y-auto overflow-x-hidden">
         {children}
       </div>

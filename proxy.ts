@@ -128,7 +128,6 @@ const SECURE_COOKIE_BASE = {
  */
 const AUTH_ROUTES: string[] = [
   "/signin",
-  "/signin/admin",
   "/signup",
   "/forgot-password",
   "/reset-password",
@@ -177,8 +176,8 @@ const UNIVERSAL_PROTECTED_ROUTES: string[] = ["/profile"];
 const ROLE_ROUTES: Record<Role, string[]> = {
   // ── Admin pages ────────────────────────────────────────────────────────────
   [ROLES.ADMIN]: [
-    "/admin", // app/(roles)/admin
-    "/admin/dashboard", // app/(roles)/admin/dashboard
+    "/", // app/(roles)/
+    "/dashboard", // app/(roles)/dashboard
   ],
 
   // ── User pages ─────────────────────────────────────────────────────────────
@@ -190,7 +189,7 @@ const ROLE_ROUTES: Record<Role, string[]> = {
 
 /** After signin, each role lands here */
 const ROLE_DEFAULT_PATHS: Record<Role, string> = {
-  [ROLES.ADMIN]: "/admin/dashboard",
+  [ROLES.ADMIN]: "/dashboard",
   [ROLES.USER]: "/", //[ROLES.USER]: "/user",
 };
 

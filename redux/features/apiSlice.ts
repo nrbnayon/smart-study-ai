@@ -2,25 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
 import { logout, updateTokens } from "./authSlice";
-
-// Helper to clear cookies
-const clearAuthCookies = () => {
-  if (typeof document === "undefined") return;
-  const cookiesToClear = [
-    "accessToken",
-    "refreshToken",
-    "authSession",
-    "userRole",
-    "userEmail",
-    "userName",
-    "userAvatar",
-    "userPermissions",
-    "reset_verified",
-  ];
-  cookiesToClear.forEach((name) => {
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-  });
-};
+import { clearAuthCookies } from "@/lib/authCookies";
 
 interface RefreshTokenResponse {
   message: string;

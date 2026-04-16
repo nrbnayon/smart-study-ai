@@ -11,6 +11,7 @@ import {
   selectIsAuthenticated,
 } from "@/redux/features/authSlice";
 import { useLogoutMutation } from "@/redux/services/authApi";
+import { clearAuthCookies, readAuthCookies, setAuthCookies } from "@/lib/authCookies";
 
 export interface UserInfo {
   name: string | null;
@@ -39,15 +40,6 @@ export function useUser() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Helper to read cookies safely
-    const getCookie = (name: string) => {
-      if (typeof document === "undefined") return null;
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-      return null;
-    };
-
     const hydrateAuth = async () => {
       // If Redux is already authenticated, we are good.
       if (isAuthenticated) {
@@ -55,80 +47,86 @@ export function useUser() {
         return;
       }
 
-      const role = getCookie("userRole");
-      const rawEmail = getCookie("userEmail");
-      const permissionsStr = getCookie("userPermissions");
-      const userName = getCookie("userName");
-      const userAvatar = getCookie("userAvatar");
-      const email = rawEmail ? decodeURIComponent(rawEmail) : "";
+      const { accessToken, refreshToken, userRole, userEmail } =
+        readAuthCookies();
 
-      if (role) {
-        let p: string[] = [];
+      let effectiveAccessToken = accessToken;
+
+      if (!effectiveAccessToken && userRole && refreshToken) {
         try {
-          if (permissionsStr) p = JSON.parse(decodeURIComponent(permissionsStr));
-        } catch {}
+          const refreshRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/refresh`,
+            {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+
+          if (refreshRes.ok) {
+            const refreshPayload = await refreshRes.json();
+            effectiveAccessToken = refreshPayload?.access_token || null;
+
+            if (effectiveAccessToken) {
+              dispatch(updateTokens({ accessToken: effectiveAccessToken }));
+              setAuthCookies({
+                accessToken: effectiveAccessToken,
+                refreshToken,
+                userRole,
+                userEmail,
+              });
+            }
+          }
+        } catch {
+          // Ignore network errors during hydration and fall back to unauthenticated state.
+        }
+      }
+
+      if (effectiveAccessToken && userRole) {
+        dispatch(
+          setCredentials({
+            user: {
+              name: redUser?.name || "User",
+              email: userEmail || "",
+              role: userRole,
+              avatar: redUser?.avatar || null,
+              permissions: redUser?.permissions || [],
+            },
+            accessToken: effectiveAccessToken,
+            refreshToken: refreshToken || undefined,
+          }),
+        );
 
         try {
-          const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/refresh`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          if (!refreshRes.ok) {
-            setIsChecking(false);
-            return;
-          }
-
-          const refreshPayload = await refreshRes.json();
-          const accessToken = refreshPayload?.access_token;
-
-          if (!accessToken) {
-            setIsChecking(false);
-            return;
-          }
-
-          dispatch(updateTokens({ accessToken }));
-
-
-          const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/me`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: { Authorization: `Bearer ${accessToken}` }
-          });
+          const meRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/me`,
+            {
+              method: "GET",
+              credentials: "include",
+              headers: { Authorization: `Bearer ${effectiveAccessToken}` },
+            },
+          );
 
           if (meRes.ok) {
             const mePayload = await meRes.json();
             const me = mePayload.data || {};
-            dispatch(
-              setCredentials({
-                user: {
-                  name: me.name || (userName ? decodeURIComponent(userName) : "User"),
-                  email: me.email || email,
-                  role: me.role || role,
-                  avatar: me.avatar || null,
-                  permissions: me.permissions || p,
-                },
-                accessToken,
-              }),
-            );
 
-          } else {
             dispatch(
               setCredentials({
                 user: {
-                  name: userName ? decodeURIComponent(userName) : "User",
-                  email,
-                  role,
-                  avatar: userAvatar ? decodeURIComponent(userAvatar) : null,
-                  permissions: p,
+                  name: me.name || "User",
+                  email: me.email || userEmail || "",
+                  role: me.role || userRole,
+                  avatar: me.avatar || null,
+                  permissions: me.permissions || [],
                 },
-                accessToken,
+                accessToken: effectiveAccessToken,
+                refreshToken: refreshToken || undefined,
               }),
             );
           }
-        } catch (error) {
-          console.error('Session hydrate failed:', error);
+        } catch {
+          // Keep cookie-backed user state if profile fetch fails.
         }
       }
 
@@ -136,7 +134,7 @@ export function useUser() {
     };
 
     hydrateAuth();
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, redUser?.avatar, redUser?.name, redUser?.permissions]);
 
   const hasRole = (role: string) => redUser?.role === role;
 
@@ -153,11 +151,8 @@ export function useUser() {
     // 2. Clear Redux State
     dispatch(logoutAction());
 
-    // 3. Clear Client-side Cookies
-    const cookiesToClear = ["refreshToken", "authSession", "userRole", "userEmail", "userName", "userPermissions", "reset_verified"];
-    cookiesToClear.forEach(name => {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    });
+    // 3. Clear client-side auth cookies
+    clearAuthCookies();
 
     console.log("User logged out successfully");
 

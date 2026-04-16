@@ -20,21 +20,9 @@ import { setCredentials } from "@/redux/features/authSlice";
 import { useSigninMutation } from "@/redux/services/authApi";
 import { toast } from "sonner";
 import { signinValidationSchema } from "@/lib/formDataValidation";
+import { setAuthCookies } from "@/lib/authCookies";
 
 type FormValues = z.infer<typeof signinValidationSchema>;
-
-const setClientCookie = (
-  name: string,
-  value: string,
-  maxAgeSeconds?: number,
-) => {
-  if (typeof document === "undefined") return;
-
-  const secureFlag = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  const maxAgePart =
-    typeof maxAgeSeconds === "number" ? `; Max-Age=${maxAgeSeconds}` : "";
-  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${secureFlag}${maxAgePart}`;
-};
 
 export const SignInForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -89,16 +77,15 @@ export const SignInForm = () => {
       };
 
       const maxAgeSeconds = cleanData.rememberMe ? 7 * 24 * 60 * 60 : undefined;
-      setClientCookie("accessToken", dummyResponse.accessToken, maxAgeSeconds);
-      setClientCookie("userRole", dummyResponse.role, maxAgeSeconds);
-      setClientCookie("userEmail", dummyResponse.email, maxAgeSeconds);
-      setClientCookie("userName", dummyResponse.name, maxAgeSeconds);
-      setClientCookie(
-        "userPermissions",
-        JSON.stringify(dummyResponse.permissions),
-        maxAgeSeconds,
+      setAuthCookies(
+        {
+          accessToken: dummyResponse.accessToken,
+          refreshToken: dummyResponse.refreshToken,
+          userRole: dummyResponse.role,
+          userEmail: dummyResponse.email,
+        },
+        { maxAgeSeconds },
       );
-      setClientCookie("authSession", "1", maxAgeSeconds);
 
       dispatch(
         setCredentials({
@@ -123,17 +110,15 @@ export const SignInForm = () => {
       const response = await signin(cleanData).unwrap();
 
       const maxAgeSeconds = cleanData.rememberMe ? 7 * 24 * 60 * 60 : undefined;
-      setClientCookie("accessToken", response.accessToken, maxAgeSeconds);
-      setClientCookie("userRole", response.role, maxAgeSeconds);
-      setClientCookie("userEmail", response.email, maxAgeSeconds);
-      setClientCookie("userName", response.name || "User", maxAgeSeconds);
-      setClientCookie(
-        "userPermissions",
-        JSON.stringify(response.permissions || []),
-        maxAgeSeconds,
+      setAuthCookies(
+        {
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          userRole: response.role,
+          userEmail: response.email,
+        },
+        { maxAgeSeconds },
       );
-
-      setClientCookie("authSession", "1", maxAgeSeconds);
 
       const userPayload = {
         name: response.name || "User",

@@ -32,6 +32,7 @@ import {
 import { useAppDispatch } from "@/redux/hooks";
 import { setCredentials } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
+import { setAuthCookies as persistAuthCookies } from "@/lib/authCookies";
 
 export type AuthView =
   | "login"
@@ -211,23 +212,6 @@ export default function AuthModal({
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const setAuthCookies = (result: any) => {
-  if (typeof document !== "undefined") {
-    const maxAge = 7 * 24 * 60 * 60; // 7 days
-    document.cookie = `accessToken=${result.accessToken}; path=/; max-age=${maxAge}`;
-    document.cookie = `userRole=${result.role}; path=/; max-age=${maxAge}`;
-    document.cookie = `userName=${encodeURIComponent(result.name)}; path=/; max-age=${maxAge}`;
-    document.cookie = `userEmail=${encodeURIComponent(result.email)}; path=/; max-age=${maxAge}`;
-    if (result.avatar) {
-      document.cookie = `userAvatar=${encodeURIComponent(result.avatar)}; path=/; max-age=${maxAge}`;
-    }
-    if (result.permissions) {
-      document.cookie = `userPermissions=${encodeURIComponent(JSON.stringify(result.permissions))}; path=/; max-age=${maxAge}`;
-    }
-  }
-};
-
 /* ================= LOGIN VIEW ================= */
 function LoginView({
   setView,
@@ -285,11 +269,21 @@ function LoginView({
             permissions: result.permissions,
           },
           accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
         }),
       );
 
-      // We explicitly set cookies for SSR/middleware if the backend doesn't set HTTP-only.
-      setAuthCookies(result);
+      persistAuthCookies(
+        {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          userRole: result.role,
+          userEmail: result.email,
+        },
+        {
+          maxAgeSeconds: formData.rememberMe ? 7 * 24 * 60 * 60 : undefined,
+        },
+      );
 
       toast.success("Welcome back!");
       onClose();

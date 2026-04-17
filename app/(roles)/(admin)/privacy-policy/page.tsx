@@ -196,7 +196,7 @@ export default function AdminPrivacyPolicyPage() {
                   {/* Inputs (Compact) */}
                   <div className="grid grid-cols-1 gap-2">
                     <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-tight ml-1">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-tight ml-1">
                         Title
                       </label>
                       <input
@@ -211,7 +211,7 @@ export default function AdminPrivacyPolicyPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-tight ml-1">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-tight ml-1">
                         Content
                       </label>
                       <textarea

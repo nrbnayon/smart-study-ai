@@ -379,7 +379,7 @@ export default function TermsAndConditionsClient() {
 
               <div className="flex justify-between items-center mb-4 pl-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-black text-slate-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
                     {index + 1}
                   </div>
                   <h3 className="font-black text-slate-800 text-base tracking-tight uppercase">
@@ -421,7 +421,7 @@ export default function TermsAndConditionsClient() {
                     className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
-                    <span className="hidden sm:inline text-[11px] font-black uppercase">
+                    <span className="hidden sm:inline text-xs font-black uppercase">
                       Save Section
                     </span>
                   </button>

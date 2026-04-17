@@ -37,7 +37,7 @@ export function SubscriptionCard({
       {/* Premium Price Banner */}
       {isPremium && price && (
         <div className="absolute top-0 right-0 p-8 text-right z-10">
-          <p className="text-[13px] text-secondary font-medium tracking-wide">
+          <p className="text-sm text-secondary font-medium tracking-wide">
             Price
           </p>
           <div className="flex items-baseline justify-end gap-1.5 mt-0.5">

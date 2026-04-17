@@ -35,7 +35,7 @@ const DashboardOverview = () => {
                 }}
               />
             ) : (
-              <span className="text-[#6366F1] font-bold text-sm uppercase">
+              <span className="text-primary font-bold text-sm uppercase">
                 {name.substring(0, 2)}
               </span>
             )}

@@ -17,7 +17,7 @@ export default function SettingsClient() {
     <div className="min-h-screen flex flex-col pb-10 animate-fade-in">
       <DashboardHeader title="Settings" />
 
-      <div className="p-4 md:p-6 lg:p-10 space-y-6 max-w-5xl mx-auto w-full mt-4">
+      <div className="p-5 space-y-4 max-w-5xl mx-auto w-full mt-2">
         {/* Navigation Tabs */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] p-1.5 flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide">
           <button

@@ -1,19 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+export interface FAQData {
+  id?: string;
+  question: string;
+  answer: string;
+}
 
 interface AddFAQModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (data: { question: string; answer: string }) => void;
+  onSave: (data: FAQData) => void;
+  initialData?: FAQData | null;
 }
 
 export default function AddFAQModal({
   isOpen,
   onClose,
-  onAdd,
+  onSave,
+  initialData,
 }: AddFAQModalProps) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -23,17 +31,24 @@ export default function AddFAQModal({
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
     if (isOpen) {
-      setQuestion("");
-      setAnswer("");
+      if (initialData) {
+        setQuestion(initialData.question);
+        setAnswer(initialData.answer);
+      } else {
+        setQuestion("");
+        setAnswer("");
+      }
     }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim() || !answer.trim()) return;
-    onAdd({ question, answer });
+    onSave({ id: initialData?.id, question, answer });
     onClose();
   };
+
+  const isEditing = !!initialData;
 
   return (
     <AnimatePresence>
@@ -56,13 +71,14 @@ export default function AddFAQModal({
             <div className="flex items-start justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-foreground">
-                  Add New FAQ
+                  {isEditing ? "Edit FAQ" : "Add New FAQ"}
                 </h2>
                 <p className="text-sm font-medium text-secondary mt-1">
                   Fill in the question and its answer
                 </p>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl transition-all cursor-pointer"
               >
@@ -115,9 +131,9 @@ export default function AddFAQModal({
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-3 bg-primary hover:bg-[#4F46E5] text-white rounded-xl font-bold text-base transition-all cursor-pointer shadow-sm"
+                  className="w-1/2 py-3 bg-primary hover:bg-primary text-white rounded-xl font-bold text-base transition-all cursor-pointer shadow-sm"
                 >
-                  Add FAQ
+                  {isEditing ? "Save Changes" : "Add FAQ"}
                 </button>
               </div>
             </form>

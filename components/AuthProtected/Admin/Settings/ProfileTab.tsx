@@ -1,13 +1,63 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { BookOpen, User, Upload, Lightbulb, Mail } from "lucide-react";
+import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+
+const profileSchema = z.object({
+  displayName: z
+    .string()
+    .min(3, "Display name must be at least 3 characters")
+    .max(50, "Display name must be at most 50 characters"),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfileTab() {
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      displayName: "Admin User",
+    },
+  });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("File size must be less than 2MB");
+        return;
+      }
+      const previewUrl = URL.createObjectURL(file);
+      setLogoPreview(previewUrl);
+      toast.success(
+        "Logo uploaded successfully. Don't forget to save changes!",
+      );
+    }
+  };
+
+  const onSubmit = async (data: ProfileFormValues) => {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    toast.success("Admin information updated successfully!");
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Brand Identity */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-gray-50 flex items-start gap-4">
+        <div className="p-5 border-b border-gray-50 flex items-start gap-4">
           <div className="p-2.5 bg-indigo-50 text-primary rounded-xl shrink-0">
             <BookOpen size={20} strokeWidth={2.5} />
           </div>
@@ -21,11 +71,24 @@ export default function ProfileTab() {
           </div>
         </div>
 
-        <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start">
+        <div className="p-5 flex flex-col md:flex-row gap-6 items-start">
           {/* Logo Preview */}
           <div className="flex flex-col items-center gap-3 shrink-0">
             <div className="w-28 h-28 bg-[#1E1B4B] rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm relative overflow-hidden">
-              <BookOpen size={40} className="text-primary" strokeWidth={1.5} />
+              {logoPreview ? (
+                <Image
+                  src={logoPreview}
+                  alt="Platform Logo"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <BookOpen
+                  size={40}
+                  className="text-primary"
+                  strokeWidth={1.5}
+                />
+              )}
             </div>
             <span className="text-xs font-semibold text-secondary">
               Current logo
@@ -41,7 +104,17 @@ export default function ProfileTab() {
                 PNG, JPG or GIF — max 2 MB. Recommended: 256×256px
               </p>
             </div>
-            <button className="px-5 py-2.5 bg-primary hover:bg-[#4F46E5] text-white rounded-lg font-bold text-sm transition-colors flex items-center gap-2 cursor-pointer shadow-sm">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              accept="image/png, image/jpeg, image/gif"
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-5 py-2.5 bg-primary hover:bg-primary text-white rounded-lg font-bold text-sm transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+            >
               <Upload size={16} strokeWidth={2.5} />
               Upload New Logo
             </button>
@@ -60,8 +133,11 @@ export default function ProfileTab() {
       </div>
 
       {/* Admin Information */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-gray-50 flex items-start gap-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white rounded-2xl border border-gray-100 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] overflow-hidden"
+      >
+        <div className="p-5 border-b border-gray-50 flex items-start gap-4">
           <div className="p-2.5 bg-indigo-50 text-primary rounded-xl shrink-0">
             <User size={20} strokeWidth={2.5} />
           </div>
@@ -69,13 +145,13 @@ export default function ProfileTab() {
             <h3 className="text-lg font-bold text-foreground">
               Admin Information
             </h3>
-            <p className="text-secondary text-sm font-medium mt-1">
+            <p className="text-secondary text-sm font-medium">
               Update your display name
             </p>
           </div>
         </div>
 
-        <div className="p-6 md:p-8 space-y-6">
+        <div className="p-5 space-y-4">
           <div className="space-y-2">
             <label className="text-base font-bold text-foreground block">
               Display Name <span className="text-red-500">*</span>
@@ -86,12 +162,21 @@ export default function ProfileTab() {
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
+                {...register("displayName")}
                 type="text"
-                defaultValue="Admin User"
-                className="w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all"
+                className={`w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none transition-all ${
+                  errors.displayName
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-gray-100 focus:border-primary"
+                }`}
                 placeholder="Enter display name"
               />
             </div>
+            {errors.displayName && (
+              <p className="text-red-500 text-sm font-medium mt-1">
+                {errors.displayName.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -106,20 +191,29 @@ export default function ProfileTab() {
               <input
                 type="email"
                 defaultValue="admin@qqai.com"
-                className="w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all cursor-not-allowed disable disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+                className="w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all cursor-not-allowed disabled:opacity-50"
                 placeholder="Enter email address"
               />
             </div>
           </div>
 
           <div className="pt-4 flex justify-end">
-            <button className="px-6 py-3 bg-primary hover:bg-[#4F46E5] text-white rounded-xl font-bold text-base transition-colors flex items-center gap-2 cursor-pointer shadow-sm">
-              <User size={18} />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-3 bg-primary hover:bg-primary text-white rounded-xl font-bold text-base transition-colors flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-70"
+            >
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <User size={18} />
+              )}
               Save Profile
             </button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

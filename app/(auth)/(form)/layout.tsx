@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import { AuthSkeleton } from "@/components/Skeleton/AuthSkeleton";
 
 export default function AuthLayout({
   children,
@@ -7,15 +8,7 @@ export default function AuthLayout({
 }) {
   return (
     <main className="min-h-screen lg:h-screen w-full flex bg-background lg:overflow-hidden">
-      <Suspense
-        fallback={
-          <div className="flex h-screen w-full items-center justify-center">
-            Loading...
-          </div>
-        }
-      >
-        {children}
-      </Suspense>
+      <Suspense fallback={<AuthSkeleton />}>{children}</Suspense>
     </main>
   );
 }

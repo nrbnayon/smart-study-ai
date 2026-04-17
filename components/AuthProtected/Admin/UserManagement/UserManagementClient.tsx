@@ -19,13 +19,38 @@ import { TableColumn } from "@/types/table.types";
 import Image from "next/image";
 import DetailsModal from "@/components/AuthProtected/Modal/DetailsModal";
 
+import AddEditUserModal from "@/components/AuthProtected/Modal/AddEditUserModal";
+import { DeleteConfirmationModal } from "@/components/Shared/DeleteConfirmationModal";
+
 export default function UserManagementClient() {
+  const [users, setUsers] = useState(userDummyData);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const filterPills = ["All", "Premium", "Basic", "Active", "Inactive"];
+
+  const filteredData = users.filter((item) => {
+    // Search filter
+    const matchesSearch =
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.email.toLowerCase().includes(search.toLowerCase());
+
+    // Category filter
+    let matchesCategory = true;
+    if (activeFilter === "Premium") matchesCategory = item.plan === "Premium";
+    else if (activeFilter === "Basic") matchesCategory = item.plan === "Basic";
+    else if (activeFilter === "Active")
+      matchesCategory = item.status === "Active";
+    else if (activeFilter === "Inactive")
+      matchesCategory = item.status === "Inactive";
+
+    return matchesSearch && matchesCategory;
+  });
 
   const columns: TableColumn<(typeof userDummyData)[0]>[] = [
     {
@@ -92,6 +117,7 @@ export default function UserManagementClient() {
     {
       key: "status",
       header: "STATUS",
+      sortable: true,
       render: (status: string) => {
         const isActive = status === "Active";
         return (
@@ -126,25 +152,72 @@ export default function UserManagementClient() {
     setIsDetailsModalOpen(true);
   };
 
+  const handleOpenAdd = () => {
+    setSelectedUser(null);
+    setIsAddEditModalOpen(true);
+  };
+
+  const handleOpenEdit = (user: any) => {
+    setSelectedUser(user);
+    setIsAddEditModalOpen(true);
+  };
+
+  const handleOpenDelete = (user: any) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleAddEditConfirm = (formData: any) => {
+    if (selectedUser) {
+      // Edit logic
+      setUsers((prev) =>
+        prev.map((u) => (u.id === selectedUser.id ? { ...u, ...formData } : u)),
+      );
+    } else {
+      // Add logic
+      const newUser = {
+        ...formData,
+        id: users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1,
+        joined: new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+        avatar: formData.name.substring(0, 2).toUpperCase(),
+      };
+      setUsers((prev) => [newUser, ...prev]);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedUser) {
+      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+      setIsDeleteModalOpen(false);
+    }
+  };
+
   const tableActions = [
     {
       label: "View",
       icon: <Eye size={18} />,
       onClick: (row: any) => handleOpenDetails(row),
-      className: "hover:bg-blue-50 text-primary hover:text-primary",
+      className:
+        "hover:bg-blue-50 text-primary hover:text-primary cursor-pointer",
       variant: "primary" as const,
     },
     {
       label: "Edit",
       icon: <PencilLine size={18} />,
-      onClick: (row: any) => console.log("Edit", row),
-      className: "hover:bg-gray-100 text-gray-400 hover:text-gray-600",
+      onClick: (row: any) => handleOpenEdit(row),
+      className:
+        "hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-pointer",
     },
     {
       label: "Delete",
       icon: <Trash2 size={18} />,
-      onClick: (row: any) => console.log("Delete", row),
-      className: "hover:bg-red-50 text-red-500 hover:text-red-600",
+      onClick: (row: any) => handleOpenDelete(row),
+      className:
+        "hover:bg-red-50 text-red-500 hover:text-red-600 cursor-pointer",
       variant: "danger" as const,
     },
   ];
@@ -180,7 +253,7 @@ export default function UserManagementClient() {
                   key={pill}
                   onClick={() => setActiveFilter(pill)}
                   className={cn(
-                    "px-4 py-2.5 rounded-xl text-sm font-semibold transition-all",
+                    "px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer",
                     activeFilter === pill
                       ? "bg-primary text-white shadow-lg shadow-primary/20"
                       : "bg-[#F8FAFC] text-gray-500 hover:bg-gray-100",
@@ -191,7 +264,10 @@ export default function UserManagementClient() {
               ))}
             </div>
 
-            <button className="ml-2 flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-bold transition-all hover:bg-primary/90 active:scale-95 shadow-lg shadow-primary/20">
+            <button
+              onClick={handleOpenAdd}
+              className="ml-2 flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-bold transition-all hover:bg-primary/90 active:scale-95 shadow-lg shadow-primary/20 cursor-pointer"
+            >
               <Plus size={20} strokeWidth={3} />
               Add User
             </button>
@@ -204,13 +280,13 @@ export default function UserManagementClient() {
             <div className="flex items-center gap-2 text-[#64748B]">
               <Users size={18} />
               <span className="text-sm font-semibold">
-                {userDummyData.length} users found
+                {filteredData.length} users found
               </span>
             </div>
           </div>
 
           <DynamicTable
-            data={userDummyData}
+            data={filteredData}
             config={{
               columns,
               showActions: true,
@@ -230,6 +306,22 @@ export default function UserManagementClient() {
         onClose={() => setIsDetailsModalOpen(false)}
         title="User Details"
         data={selectedUser}
+      />
+
+      <AddEditUserModal
+        isOpen={isAddEditModalOpen}
+        onClose={() => setIsAddEditModalOpen(false)}
+        onConfirm={handleAddEditConfirm}
+        title={selectedUser ? "Edit User" : "Add New User"}
+        user={selectedUser}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User"
+        description={`Are you sure you want to delete ${selectedUser?.name}? This action cannot be undone.`}
       />
     </div>
   );

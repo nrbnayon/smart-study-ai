@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function SignInPage() {
   return (
-    <div>
+    <div className="flex-1 flex min-h-screen w-full items-center justify-center p-4">
       <SignInForm />
     </div>
   );

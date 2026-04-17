@@ -6,9 +6,5 @@ export const metadata = {
 };
 
 export default function ForgetPasswordPage() {
-  return (
-    <div>
-      <ForgetPassword />
-    </div>
-  );
+  return <ForgetPassword />;
 }

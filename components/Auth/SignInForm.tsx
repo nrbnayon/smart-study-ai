@@ -262,7 +262,7 @@ export const SignInForm = () => {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 auth-card shadow-lg w-full w-full sm:min-w-lg p-5 sm:p-8"
+        className="space-y-4 auth-card shadow-lg w-full w-full sm:max-w-lg mx-auto p-5 sm:p-8"
       >
         <div className="space-y-4">
           {/* Email */}

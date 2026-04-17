@@ -1,4 +1,4 @@
-// components/Dashboard/Shared/StatsCard.tsx
+// components/Shared/StatsCard.tsx
 import { cn } from "@/lib/utils";
 import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -23,58 +23,47 @@ export function StatsCard({
   subtitle,
   className,
 }: StatsCardProps) {
-  // Extract trend value (e.g. "+5", "-3", "12%") from subtitle if exists
-  const trendMatch = subtitle?.match(/^([+-]?\d+\.?\d*%?)\s*(.*)/);
-  const trendValue = trendMatch ? trendMatch[1] : null;
-  const subtitleText = trendMatch ? trendMatch[2] : subtitle || '';
-
   return (
     <div
       className={cn(
-        "bg-white px-5 py-6 rounded-lg flex items-start justify-between h-full border-none cursor-pointer transition-all hover:bg-gray-50 shadow-[6px_6px_54px_0px_rgba(0,0,0,0.05)] hover:shadow-lg",
-        className
+        "bg-white p-6 rounded-2xl border border-gray-100 flex flex-col gap-6 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)]",
+        className,
       )}
     >
-      <div className="flex flex-col justify-center gap-2">
-        <h3 className="text-foreground text-sm font-semibold">{title}</h3>
-        <div className="text-3xl font-semibold text-foreground">{value}</div>
+      {/* Top Row: Icon and Trend */}
+      <div className="flex items-center justify-between">
+        <div
+          className="flex items-center justify-center rounded-xl w-12 h-12"
+          style={{ backgroundColor: iconBgColor }}
+        >
+          <Icon size={24} style={{ color: iconColor }} strokeWidth={2} />
+        </div>
+
         {subtitle && (
-          <div className="flex items-center gap-1 text-xs">
-            {trendValue && isUp !== undefined && (
-              <>
-                {isUp ? (
-                  <TrendingUp className="w-3 h-3 text-green-500" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                )}
-                <span className={isUp ? "text-green-500 font-medium" : "text-red-500 font-medium"}>
-                  {trendValue}
-                </span>
-              </>
+          <div
+            className={cn(
+              "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold",
+              isUp
+                ? "bg-[#ECFDF5] text-[#10B981]"
+                : "bg-[#FEF2F2] text-[#EF4444]",
             )}
-            {!trendValue && isUp !== undefined && (
-              <>
-                {isUp ? (
-                  <TrendingUp className="w-3 h-3 text-green-500" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                )}
-              </>
+          >
+            {isUp ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
             )}
-            <span className="text-secondary">{subtitleText}</span>
+            {subtitle}
           </div>
         )}
       </div>
 
-      <div
-        className="flex items-center justify-center rounded-lg p-3 min-w-[56px] min-h-[56px] mt-1"
-        style={{ backgroundColor: iconBgColor }}
-      >
-        <Icon
-          size={28}
-          style={{ color: iconColor }}
-          strokeWidth={2}
-        />
+      {/* Bottom Content: Title and Value */}
+      <div className="flex flex-col gap-1">
+        <h3 className="text-secondary text-sm font-medium">{title}</h3>
+        <div className="text-3xl font-bold text-foreground leading-tight">
+          {value}
+        </div>
       </div>
     </div>
   );

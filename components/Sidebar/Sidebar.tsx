@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import LogoutModal from "../Shared/LogoutModal";
 import { sidebarLinks, type SidebarLink } from "@/config/sidebarLinks";
+import { DashboardSkeleton } from "@/components/Skeleton/DashboardSkeleton";
 
 interface DashboardWrapperProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ interface DashboardWrapperProps {
 export default function DashboardWrapper({ children }: DashboardWrapperProps) {
   const pathname = usePathname();
   // Use centralized user hook
-  const { name, role, avatar, hasPermission, isAuthenticated, logout } =
+  const { name, role, avatar, hasPermission, isAuthenticated, logout, isLoading } =
     useUser();
   const isAdmin = role?.toLowerCase() === "admin";
 
@@ -283,6 +284,10 @@ export default function DashboardWrapper({ children }: DashboardWrapperProps) {
         return role.charAt(0).toUpperCase() + role.slice(1);
     }
   };
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   // If not authenticated, render children without sidebar
   if (!isAuthenticated) {

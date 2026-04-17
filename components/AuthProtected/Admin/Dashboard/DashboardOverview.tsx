@@ -22,7 +22,7 @@ const DashboardOverview = () => {
       header: "NAME",
       render: (name: string, row) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#F1F5F9] border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-10 h-10 rounded-full bg-primary/50 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
             {row.avatar ? (
               <Image
                 src={row.avatar}

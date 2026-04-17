@@ -1,256 +1,236 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
-import SearchBar from "@/components/Shared/SearchBar";
 import { DynamicTable } from "@/components/Shared/DynamicTable";
-import { TablePagination } from "@/components/Shared/TablePagination";
-import {
-  useGetAllUsersQuery,
-  useUpdateUserByIdMutation,
-  PaginatedApiResponse,
-} from "@/redux/services/userApi";
-import { MoreVertical } from "lucide-react";
+import { userDummyData } from "@/data/userDummyData";
 import { cn } from "@/lib/utils";
-import { User } from "@/types/users";
-import Image from "next/image";
+import {
+  Eye,
+  PencilLine,
+  Trash2,
+  Plus,
+  Search,
+  Filter,
+  Users,
+} from "lucide-react";
 import { TableColumn } from "@/types/table.types";
-
-function UserStatusDropdown({ user }: { user: User }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [updateUser, { isLoading }] = useUpdateUserByIdMutation();
-
-  const handleStatusChange = async (newStatus: string) => {
-    try {
-      await updateUser({ id: user._id, status: newStatus }).unwrap();
-      setIsOpen(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.error(
-        "Failed to update status:",
-        err?.data?.message || err?.message || err,
-      );
-    }
-  };
-
-  const statuses = [
-    {
-      label: "Suspended",
-      value: "suspended",
-      bg: "bg-[#FFE73580] cursor-pointer",
-      text: "text-[#EAB308]",
-    },
-    {
-      label: "Active",
-      value: "active",
-      bg: "bg-[#22C55E33] cursor-pointer",
-      text: "text-[#22C55E]",
-    },
-    {
-      label: "Banned",
-      value: "banned",
-      bg: "bg-[#DF141426] cursor-pointer",
-      text: "text-[#DF1414]",
-    },
-  ];
-
-  return (
-    <div className="relative inline-block text-left">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center cursor-pointer"
-        aria-label="More actions"
-      >
-        <MoreVertical className="w-5 h-5 text-gray-400" />
-      </button>
-
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-[1.25rem] shadow-[0px_8px_24px_-4px_rgba(10,13,18,0.08),0px_2px_4px_-2px_rgba(10,13,18,0.03)] z-50 p-3 flex flex-col items-center">
-          <div className="w-full text-[11px] font-semibold px-2 mb-2 text-[#9CA3AF] text-left">
-            Action
-          </div>
-          <div className="w-full space-y-2">
-            {statuses.map((status) => (
-              <button
-                key={status.value}
-                onClick={() => handleStatusChange(status.value)}
-                disabled={isLoading}
-                className={cn(
-                  "w-full flex items-center justify-center py-2 px-3 rounded-full text-xs font-semibold transition-all hover:opacity-80 active:scale-95 disabled:opacity-50",
-                  status.bg,
-                  status.text,
-                  user.status === status.value &&
-                    "ring-1 ring-gray-300 ring-offset-1",
-                )}
-              >
-                {status.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-transparent"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
+import Image from "next/image";
+import DetailsModal from "@/components/AuthProtected/Modal/DetailsModal";
 
 export default function UserManagementClient() {
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  const { data, isLoading } = useGetAllUsersQuery({
-    search,
-    page,
-    limit,
-    sortBy: "createdAt",
-    sortOrder: "desc",
-  }) as { data: PaginatedApiResponse<User> | undefined; isLoading: boolean };
+  const filterPills = ["All", "Premium", "Basic", "Active", "Inactive"];
 
-  const columns: TableColumn<User>[] = [
+  const columns: TableColumn<(typeof userDummyData)[0]>[] = [
+    {
+      key: "id",
+      header: "#",
+      className: "text-secondary font-medium",
+    },
     {
       key: "name",
-      header: "User",
-      render: (_: string, row: User) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-orange-500 overflow-hidden border">
-            {row.avatar ? (
-              <Image
-                src={row.avatar}
-                alt={row.name}
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              row.name
-                .split(" ")
-                .map((n: string) => n[0])
-                .join("")
-                .toUpperCase()
-            )}
-          </div>
-          <span className="font-semibold text-foreground">{row.name}</span>
-        </div>
-      ),
-    },
-    {
-      key: "email",
-      header: "Email",
-      render: (email: string) => (
-        <span className="text-secondary opacity-60">{email}</span>
-      ),
-    },
-    {
-      key: "createdAt",
-      header: "Join Date",
-      render: (date: string) => (
-        <span className="font-semibold text-foreground">
-          {date ? new Date(date).toISOString().split("T")[0] : "2026-03-01"}
-        </span>
-      ),
-    },
-    {
-      key: "reports",
-      header: "Reports",
-      align: "center" as const,
-      render: (reports: number) => (
-        <span className="text-foreground opacity-70 text-center">
-          {reports || 0}
-        </span>
-      ),
-    },
-    {
-      key: "status",
-      header: "Status",
-      align: "center" as const,
-      render: (status: string) => {
-        const statusConfig: Record<string, { bg: string; text: string }> = {
-          active: { bg: "bg-[#22C55E33]", text: "text-[#22C55E]" },
-          suspended: { bg: "bg-[#FFE73580]", text: "text-[#EAB308]" },
-          banned: { bg: "bg-[#DF141426]", text: "text-[#DF1414]" },
-        };
-        const config = statusConfig[status] || {
-          bg: "bg-gray-100",
-          text: "text-gray-600",
-        };
+      header: "NAME",
+      render: (name: string, row) => {
+        const hasValidAvatar =
+          row.avatar &&
+          (row.avatar.startsWith("/") || row.avatar.startsWith("http"));
+
         return (
-          <span
-            className={cn(
-              "px-4 py-1.5 rounded-full text-xs font-medium inline-block min-w-[90px] text-center capitalize",
-              config.bg,
-              config.text,
-            )}
-          >
-            {status}
-          </span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/5 flex items-center justify-center overflow-hidden shrink-0">
+              {hasValidAvatar ? (
+                <Image
+                  src={row.avatar}
+                  alt={name}
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback handled by check, but extra safety
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              ) : (
+                <span className="text-primary font-bold text-sm uppercase">
+                  {name.substring(0, 2)}
+                </span>
+              )}
+            </div>
+            <span className="font-semibold text-foreground">{name}</span>
+          </div>
         );
       },
     },
     {
-      key: "actions",
-      header: "Actions",
-      align: "center" as const,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: (_: any, row: User) => <UserStatusDropdown user={row} />,
+      key: "email",
+      header: "EMAIL",
+      className: "text-secondary",
+    },
+    {
+      key: "plan",
+      header: "PLAN",
+      render: (plan: string) => (
+        <div
+          className={cn(
+            "px-3 py-1 rounded-lg text-xs font-medium inline-flex items-center gap-1",
+            plan === "Premium"
+              ? "bg-primary/10 text-primary"
+              : "bg-gray-100 text-gray-600",
+          )}
+        >
+          {plan === "Premium" && <span className="text-[10px]">👑</span>}
+          {plan}
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      header: "STATUS",
+      render: (status: string) => {
+        const isActive = status === "Active";
+        return (
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "w-2 h-2 rounded-full",
+                isActive ? "bg-primary" : "bg-gray-300",
+              )}
+            />
+            <span
+              className={cn(
+                "text-sm font-medium capitalize",
+                isActive ? "text-primary" : "text-gray-400",
+              )}
+            >
+              {status}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      key: "joined",
+      header: "JOINED",
+      className: "text-secondary",
+    },
+  ];
+
+  const handleOpenDetails = (user: any) => {
+    setSelectedUser(user);
+    setIsDetailsModalOpen(true);
+  };
+
+  const tableActions = [
+    {
+      label: "View",
+      icon: <Eye size={18} />,
+      onClick: (row: any) => handleOpenDetails(row),
+      className: "hover:bg-blue-50 text-primary hover:text-primary",
+      variant: "primary" as const,
+    },
+    {
+      label: "Edit",
+      icon: <PencilLine size={18} />,
+      onClick: (row: any) => console.log("Edit", row),
+      className: "hover:bg-gray-100 text-gray-400 hover:text-gray-600",
+    },
+    {
+      label: "Delete",
+      icon: <Trash2 size={18} />,
+      onClick: (row: any) => console.log("Delete", row),
+      className: "hover:bg-red-50 text-red-500 hover:text-red-600",
+      variant: "danger" as const,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
-      <DashboardHeader
-        title="User Management"
-        description="Mange platform users and their accounts"
-      />
+    <div className="min-h-screen flex flex-col bg-[#FDFDFF]">
+      <DashboardHeader title="User Management" />
 
-      <div className="p-5 flex flex-col gap-6 w-full mx-auto">
-        <div className="bg-white p-6 rounded-xl border border-primary/10 shadow-none">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-            <SearchBar
-              onSearch={setSearch}
-              placeholder="Search users by name or email..."
-              className="max-w-full bg-white border border-primary/10 rounded-xl"
+      <div className="p-4 md:p-6 space-y-6">
+        {/* Search and Filters Bar */}
+        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] flex flex-wrap items-center gap-4">
+          {/* Search Box */}
+          <div className="relative flex-1 min-w-[280px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-[#F8FAFC] border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none text-foreground font-medium"
             />
           </div>
 
-          <div className="overflow-hidden">
-            <DynamicTable
-              data={data?.data || []}
-              config={{
-                columns,
-                showActions: false, // Using manual actions column
-              }}
-              loading={isLoading}
-              pagination={{ enabled: false }}
-              className="border-none shadow-none bg-white rounded-none p-0"
-              headerClassName="!bg-white !text-gray-500 font-semibold border-b border-gray-50"
-              rowClassName="hover:bg-gray-50/50 border-b border-gray-100 last:border-0 transition-colors"
-            />
-          </div>
+          <div className="flex items-center gap-2">
+            <button className="p-3 bg-[#F8FAFC] text-gray-400 rounded-xl hover:bg-gray-100 transition-colors">
+              <Filter size={20} />
+            </button>
 
-          {!isLoading && data?.pagination && data.pagination.total >= 10 && (
-            <div className="pt-8">
-              <TablePagination
-                currentPage={page}
-                totalPages={data.pagination.totalPages}
-                totalItems={data.pagination.total}
-                itemsPerPage={limit}
-                onPageChange={setPage}
-                onPageSizeChange={setLimit}
-                showPageSize={true}
-                pageSizeOptions={[5, 10, 20, 50, 100]}
-                className="border-t-0 p-0 "
-              />
+            {/* Filter Pills */}
+            <div className="flex items-center gap-2">
+              {filterPills.map((pill) => (
+                <button
+                  key={pill}
+                  onClick={() => setActiveFilter(pill)}
+                  className={cn(
+                    "px-4 py-2.5 rounded-xl text-sm font-semibold transition-all",
+                    activeFilter === pill
+                      ? "bg-primary text-white shadow-lg shadow-primary/20"
+                      : "bg-[#F8FAFC] text-gray-500 hover:bg-gray-100",
+                  )}
+                >
+                  {pill}
+                </button>
+              ))}
             </div>
-          )}
+
+            <button className="ml-2 flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-bold transition-all hover:bg-primary/90 active:scale-95 shadow-lg shadow-primary/20">
+              <Plus size={20} strokeWidth={3} />
+              Add User
+            </button>
+          </div>
+        </div>
+
+        {/* User Table Container */}
+        <div className="bg-white rounded-2xl border border-gray-100 flex flex-col shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-50">
+            <div className="flex items-center gap-2 text-[#64748B]">
+              <Users size={18} />
+              <span className="text-sm font-semibold">
+                {userDummyData.length} users found
+              </span>
+            </div>
+          </div>
+
+          <DynamicTable
+            data={userDummyData}
+            config={{
+              columns,
+              showActions: true,
+              actionsLabel: "ACTIONS",
+              actions: tableActions,
+            }}
+            pagination={{ enabled: true, pageSize: 10 }}
+            className="border-none shadow-none"
+            headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
+            rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
+          />
         </div>
       </div>
+
+      <DetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        title="User Details"
+        data={selectedUser}
+      />
     </div>
   );
 }

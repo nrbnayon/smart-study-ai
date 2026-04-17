@@ -30,7 +30,7 @@ export function StatsCard({
         className,
       )}
     >
-      {/* Top Row: Icon and Trend */}
+      {/* Top Row: Icon and Trend/Subtitle */}
       <div className="flex items-center justify-between">
         <div
           className="flex items-center justify-center rounded-xl w-12 h-12"
@@ -42,17 +42,16 @@ export function StatsCard({
         {subtitle && (
           <div
             className={cn(
-              "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold",
-              isUp
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+              isUp === true
                 ? "bg-[#ECFDF5] text-[#10B981]"
-                : "bg-[#FEF2F2] text-[#EF4444]",
+                : isUp === false
+                  ? "bg-[#FEF2F2] text-[#EF4444]"
+                  : "text-secondary font-medium px-0", // Neutral style when isUp is undefined
             )}
           >
-            {isUp ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
+            {isUp === true && <TrendingUp className="w-3.5 h-3.5" />}
+            {isUp === false && <TrendingDown className="w-3.5 h-3.5" />}
             {subtitle}
           </div>
         )}

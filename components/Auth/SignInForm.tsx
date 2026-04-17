@@ -28,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { signinValidationSchema } from "@/lib/formDataValidation";
 import { clearAuthCookies, setAuthCookies } from "@/lib/authCookies";
+import Image from "next/image";
 
 type FormValues = z.infer<typeof signinValidationSchema>;
 
@@ -237,25 +238,26 @@ export const SignInForm = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full space-y-8"
+      className="w-full px-4 mx-auto"
     >
       {/* Title & Subtitle */}
-      <div className="text-center space-y-1">
-        <h1 className="text-4xl font-semibold tracking-tight text-[#1F232A]">
-          Login
+      <div className="text-center space-y-3 mb-3">
+        <Image src="/icons/logo.svg" alt="Logo" width={160} height={50} className="mx-auto mb-2" />
+        <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground font-onest">
+         Admin Login
         </h1>
         <p className="text-secondary font-onest text-lg">
           Enter your details to continue
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 auth-card shadow-lg w-full w-full sm:min-w-lg p-5 sm:p-8">
         <div className="space-y-4">
           {/* Email */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label
               htmlFor="email"
-              className="text-base font-medium text-[#1F232A]"
+              className="text-base font-medium text-foreground"
             >
               Email
             </Label>
@@ -265,7 +267,7 @@ export const SignInForm = () => {
               type="email"
               autoComplete="email"
               className={cn(
-                "h-14 rounded-2xl border-gray-200 focus:border-primary px-5 text-base",
+                "h-12 rounded-xl border-gray-200 focus:border-primary/50 px-3 text-base",
                 errors.email && "border-destructive focus:border-destructive",
               )}
               {...register("email")}
@@ -279,10 +281,10 @@ export const SignInForm = () => {
           </div>
 
           {/* Password */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label
               htmlFor="password"
-              className="text-base font-medium text-[#1F232A]"
+              className="text-base font-medium text-foreground"
             >
               Password
             </Label>
@@ -293,7 +295,7 @@ export const SignInForm = () => {
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 className={cn(
-                  "h-14 rounded-2xl border-gray-200 focus:border-primary px-5 pr-14 text-base",
+                  "h-12 rounded-xl border-gray-200 focus:border-primary/50 px-3 text-base",
                   errors.password &&
                     "border-destructive focus:border-destructive",
                 )}
@@ -321,7 +323,7 @@ export const SignInForm = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between my-6">
           <Controller
             name="rememberMe"
             control={control}
@@ -335,7 +337,7 @@ export const SignInForm = () => {
                 />
                 <Label
                   htmlFor="rememberMe"
-                  className="text-base text-[#1F232A] cursor-pointer font-normal"
+                  className="text-sm text-foreground cursor-pointer font-normal"
                 >
                   Remember me
                 </Label>
@@ -344,7 +346,7 @@ export const SignInForm = () => {
           />
           <Link
             href="/forgot-password"
-            className="text-base text-primary font-medium hover:underline"
+            className="text-sm text-primary font-medium hover:underline"
           >
             Forgot password?
           </Link>
@@ -353,21 +355,21 @@ export const SignInForm = () => {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full h-14 bg-primary hover:bg-primary/90 text-white text-lg font-semibold rounded-2xl shadow-lg shadow-primary/20"
+          className="w-full h-12 bg-primary hover:bg-primary/90 text-white text-base font-semibold rounded-xl"
         >
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Log in"}
         </Button>
 
         <div className="text-center pt-2">
-          <span className="text-secondary font-onest text-lg">
-            Don&apos;t have an account?{" "}
+          <span className="text-secondary font-onest text-xs">
+            Admin accounts are pre-configured. <br /> Contact your system administrator for access.
           </span>
-          <Link
+          {/* <Link
             href="/signup"
             className="text-primary font-bold font-onest text-lg hover:underline ml-1"
           >
             Sign up
-          </Link>
+          </Link> */}
         </div>
 
         {process.env.NODE_ENV === "development" && (

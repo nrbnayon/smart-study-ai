@@ -123,7 +123,7 @@ export default function DashboardNotFound() {
             size="lg"
             className="bg-primary! hover:bg-primary/80! text-white shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Link href="/admin/dashboard" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <Layout className="w-4 h-4" />
               Go to Dashboard
             </Link>

@@ -276,7 +276,7 @@ function LoginView({
       onClose();
 
       if (result.role === "admin") {
-        router.push("/admin/dashboard");
+        router.push("/dashboard");
       } else if (redirectTo) {
         router.push(redirectTo);
       } else {

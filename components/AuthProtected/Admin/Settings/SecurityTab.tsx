@@ -37,6 +37,7 @@ export default function SecurityTab() {
   const onSubmit = async (data: SecurityFormValues) => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log(data);
     toast.success("Password updated successfully!");
     reset();
   };

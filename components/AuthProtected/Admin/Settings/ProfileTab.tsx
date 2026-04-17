@@ -50,6 +50,7 @@ export default function ProfileTab() {
   const onSubmit = async (data: ProfileFormValues) => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log(data);
     toast.success("Admin information updated successfully!");
   };
 

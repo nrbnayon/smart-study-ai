@@ -9,12 +9,15 @@ export default function ResetSuccessPage() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 bg-[#FCFCFD]">
       {/* Logo */}
-      <Link href="/" className="absolute top-8 left-8 hover:opacity-80 transition-opacity">
+      <Link
+        href="/"
+        className="absolute top-8 left-8 hover:opacity-80 transition-opacity"
+      >
         <Image
-          src="/icons/logo1.png"
+          src="/icons/logo.svg"
           alt="Logo"
-          width={110}
-          height={40}
+          width={160}
+          height={50}
           className="h-auto"
         />
       </Link>
@@ -30,7 +33,8 @@ export default function ResetSuccessPage() {
             Success!
           </h1>
           <p className="text-secondary font-onest text-lg max-w-sm mx-auto">
-            Password Reset successful! You can now signin with your new password.
+            Password Reset successful! You can now signin with your new
+            password.
           </p>
         </div>
 

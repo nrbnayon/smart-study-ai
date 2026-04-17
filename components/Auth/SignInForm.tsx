@@ -114,14 +114,12 @@ export const SignInForm = () => {
         permissions: ["admin", "read", "write"],
       };
 
-      setAuthCookies(
-        {
-          accessToken: dummyResponse.accessToken,
-          refreshToken: dummyResponse.refreshToken,
-          userRole: dummyResponse.role,
-          userEmail: dummyResponse.email,
-        },
-      );
+      setAuthCookies({
+        accessToken: dummyResponse.accessToken,
+        refreshToken: dummyResponse.refreshToken,
+        userRole: dummyResponse.role,
+        userEmail: dummyResponse.email,
+      });
 
       dispatch(
         setCredentials({
@@ -212,7 +210,7 @@ export const SignInForm = () => {
 
       toast.success("Logged in successfully!");
       router.push(safeRedirect || "/dashboard");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Signin error:", error);
       let message = "Signin failed. Please try again.";
@@ -220,15 +218,20 @@ export const SignInForm = () => {
       if (error?.data?.message) {
         message = error.data.message;
         // Clean up technical validation strings
-        if (message.includes("validation failed") || message.includes("enum value")) {
-          message = "There was a problem with your account information. Please contact support.";
+        if (
+          message.includes("validation failed") ||
+          message.includes("enum value")
+        ) {
+          message =
+            "There was a problem with your account information. Please contact support.";
         }
       } else if (error?.status === 500) {
         message = "Server error. Please try again later.";
       } else if (error?.status === "FETCH_ERROR") {
-        message = "Cannot connect to server. Please check your internet connection.";
+        message =
+          "Cannot connect to server. Please check your internet connection.";
       }
-      
+
       toast.error(message);
     }
   };
@@ -242,16 +245,25 @@ export const SignInForm = () => {
     >
       {/* Title & Subtitle */}
       <div className="text-center space-y-3 mb-3">
-        <Image src="/icons/logo.svg" alt="Logo" width={160} height={50} className="mx-auto mb-2" />
+        <Image
+          src="/icons/logo.svg"
+          alt="Logo"
+          width={160}
+          height={50}
+          className="mx-auto mb-2"
+        />
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground font-onest">
-         Admin Login
+          Admin Login
         </h1>
         <p className="text-secondary font-onest text-lg">
           Enter your details to continue
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 auth-card shadow-lg w-full w-full sm:min-w-lg p-5 sm:p-8">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4 auth-card shadow-lg w-full w-full sm:min-w-lg p-5 sm:p-8"
+      >
         <div className="space-y-4">
           {/* Email */}
           <div className="space-y-1">
@@ -362,7 +374,8 @@ export const SignInForm = () => {
 
         <div className="text-center pt-2">
           <span className="text-secondary font-onest text-xs">
-            Admin accounts are pre-configured. <br /> Contact your system administrator for access.
+            Admin accounts are pre-configured. <br /> Contact your system
+            administrator for access.
           </span>
           {/* <Link
             href="/signup"
@@ -374,7 +387,9 @@ export const SignInForm = () => {
 
         {process.env.NODE_ENV === "development" && (
           <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-2xl">
-            <p className="text-sm font-semibold text-primary mb-2">Dev Helpers:</p>
+            <p className="text-sm font-semibold text-primary mb-2">
+              Dev Helpers:
+            </p>
             <Button
               type="button"
               variant="outline"

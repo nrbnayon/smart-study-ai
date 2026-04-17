@@ -2,16 +2,15 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, BookOpen, Check, X, Edit3, Search, Filter } from "lucide-react";
-import { motion } from "framer-motion";
+import { Crown, Search, Filter } from "lucide-react";
 import Image from "next/image";
 import { userDummyData } from "@/data/userDummyData";
 import AddEditUserModal from "@/components/AuthProtected/Modal/AddEditUserModal";
 import EditFeaturesModal from "@/components/AuthProtected/Modal/EditFeaturesModal";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
 import { DynamicTable } from "@/components/Shared/DynamicTable";
-import { cn } from "@/lib/utils";
 import { TableColumn } from "@/types/table.types";
+import { SubscriptionCard } from "./SubscriptionCard";
 
 const PLAN_FEATURES = {
   Basic: [
@@ -166,129 +165,21 @@ export default function SubscriptionsClient() {
 
       <div className="p-4 md:p-6 space-y-8">
         {/* Plan Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Basic Plan */}
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col"
-          >
-            <div className="p-8 pb-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gray-50 rounded-lg text-secondary flex items-center gap-2">
-                  <BookOpen size={24} />
-                  <h3 className="text-xl font-bold text-foreground">Basic</h3>
-                </div>
-                <div>
-                  <p className="text-sm text-secondary font-medium">
-                    Total Subscribers
-                  </p>
-                  <span className="text-2xl font-bold text-foreground">13</span>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+          <SubscriptionCard
+            planType="Basic"
+            subscribersCount={13}
+            features={plans.Basic}
+            onEditFeatures={handleEditFeatures}
+          />
 
-              <div className="space-y-4 my-6">
-                {plans.Basic.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3">
-                    {f.included ? (
-                      <div className="w-5 h-5 rounded-full bg-green-50 flex items-center justify-center">
-                        <Check
-                          size={12}
-                          className="text-green-500"
-                          strokeWidth={3}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center">
-                        <X size={12} className="text-red-400" strokeWidth={3} />
-                      </div>
-                    )}
-                    <span
-                      className={cn(
-                        "text-sm font-medium",
-                        f.included
-                          ? "text-foreground"
-                          : "text-secondary line-through opacity-50",
-                      )}
-                    >
-                      {f.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="mt-auto p-6 pt-0">
-              <button
-                onClick={() => handleEditFeatures("Basic")}
-                className="w-full py-3 bg-white border border-gray-100 rounded-xl text-foreground font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Edit3 size={16} /> Edit Features
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Premium Plan */}
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="bg-white rounded-2xl border-2 border-primary shadow-xl shadow-primary/5 overflow-hidden flex flex-col relative"
-          >
-            <div className="absolute top-0 right-0 p-8 text-right">
-              <p className="text-xs text-secondary font-bold uppercase tracking-wider">
-                Price
-              </p>
-              <div className="flex items-baseline justify-end gap-1">
-                <span className="text-2xl font-bold text-foreground">
-                  $9.99
-                </span>
-                <span className="text-sm text-secondary">/month</span>
-              </div>
-            </div>
-
-            <div className="p-8 pb-4">
-              <div className="flex flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-lg text-primary flex items-center gap-2">
-                  <Crown size={24} />
-                  <h3 className="text-xl font-bold text-foreground">Premium</h3>
-                </div>
-                <div>
-                  <p className="text-sm text-secondary font-medium">
-                    Total Subscribers
-                  </p>
-                  <span className="text-2xl font-bold text-foreground">12</span>
-                </div>
-              </div>
-
-              <div className="space-y-4 my-6">
-                {plans.Premium.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3">
-                    {f.included ? (
-                      <div className="w-5 h-5 rounded-full bg-green-50 flex items-center justify-center">
-                        <Check
-                          size={12}
-                          className="text-green-500"
-                          strokeWidth={3}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center">
-                        <X size={12} className="text-red-400" strokeWidth={3} />
-                      </div>
-                    )}
-                    <span className="text-sm font-medium text-foreground">
-                      {f.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="mt-auto p-6 pt-0">
-              <button
-                onClick={() => handleEditFeatures("Premium")}
-                className="w-full py-3 bg-white border border-primary/20 rounded-xl text-primary font-bold hover:bg-primary/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Edit3 size={16} /> Edit Features
-              </button>
-            </div>
-          </motion.div>
+          <SubscriptionCard
+            planType="Premium"
+            subscribersCount={12}
+            features={plans.Premium}
+            onEditFeatures={handleEditFeatures}
+            price="$9.99"
+          />
         </div>
 
         {/* Subscriber List Section */}

@@ -215,23 +215,6 @@ export const userApi = apiSlice.injectEndpoints({
     }),
 
     // ── Admin: System Settings ───────────────────────────────────────────────
-
-    getSystemSettings: builder.query<ApiResponse<SystemSettings>, void>({
-      query: () => "/settings",
-      providesTags: ["Settings"],
-    }),
-
-    updateSystemSettings: builder.mutation<
-      ApiResponse<SystemSettings>,
-      Partial<SystemSettings>
-    >({
-      query: (body) => ({
-        url: "/settings",
-        method: "PUT",
-        body,
-      }),
-      invalidatesTags: ["Settings"],
-    }),
   }),
 });
 
@@ -244,6 +227,4 @@ export const {
   useUpdateUserByIdMutation,
   useDeleteUserMutation,
   useCreateUserMutation,
-  useGetSystemSettingsQuery,
-  useUpdateSystemSettingsMutation,
 } = userApi;

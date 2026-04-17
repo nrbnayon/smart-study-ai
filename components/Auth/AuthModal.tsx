@@ -32,7 +32,7 @@ import {
 import { useAppDispatch } from "@/redux/hooks";
 import { setCredentials } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
-import { setAuthCookies as persistAuthCookies } from "@/lib/authCookies";
+// import { setAuthCookies as persistAuthCookies } from "@/lib/authCookies";
 
 export type AuthView =
   | "login"

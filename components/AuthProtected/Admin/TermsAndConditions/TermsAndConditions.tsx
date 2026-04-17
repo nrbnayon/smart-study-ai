@@ -11,6 +11,7 @@ import {
   ChevronUp,
   ChevronDown,
   Trash2,
+  Plus,
 } from "lucide-react";
 import { termsOfService } from "@/data/legalData";
 import { toast } from "sonner";
@@ -62,6 +63,17 @@ export default function TermsAndConditionsClient() {
       ];
       setSections(newSections);
     }
+  };
+
+  const handleAddNewSection = () => {
+    setSections([
+      ...sections,
+      {
+        id: `section-${Date.now()}`,
+        title: "",
+        content: "",
+      },
+    ]);
   };
 
   const confirmDelete = () => {
@@ -177,7 +189,7 @@ export default function TermsAndConditionsClient() {
                     onChange={(e) =>
                       handleTitleChange(section.id, e.target.value)
                     }
-                    className="font-bold text-[15px] text-foreground focus:outline-none w-full bg-transparent placeholder:text-gray-300"
+                    className="font-bold text-base text-foreground focus:outline-none w-full bg-transparent placeholder:text-gray-300"
                     placeholder="Section Title"
                   />
                 </div>
@@ -224,6 +236,13 @@ export default function TermsAndConditionsClient() {
           );
         })}
       </div>
+
+      <button
+        onClick={handleAddNewSection}
+        className="w-full py-4 mt-2 bg-transparent border border-gray-300 hover:bg-gray-50 text-secondary rounded-2xl font-bold text-[15px] transition-all flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <Plus size={18} strokeWidth={2.5} /> Add New Section
+      </button>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
@@ -290,7 +309,7 @@ export default function TermsAndConditionsClient() {
                       <h3 className="text-lg font-bold text-foreground mb-3">
                         {index + 1}. {section.title}
                       </h3>
-                      <p className="text-[15px] leading-relaxed text-secondary whitespace-pre-wrap">
+                      <p className="text-base leading-relaxed text-secondary whitespace-pre-wrap">
                         {section.content}
                       </p>
                     </div>

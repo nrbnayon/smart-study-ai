@@ -105,7 +105,7 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   // Define tag types for cache invalidation
-  tagTypes: ["User", "Auth", "Dashboard", "Profile"],
+  tagTypes: ["User", "Auth", "Dashboard", "Profile", "Settings"],
   // Define endpoints in separate files and inject them here
   endpoints: () => ({}),
 });

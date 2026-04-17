@@ -26,6 +26,7 @@ export interface TableAction<T = any> {
   tooltip?: string;
   requiresConfirmation?: boolean;
   confirmationConfig?: ConfirmationConfig;
+  render?: (row: T, index: number) => ReactNode;
 }
 
 // Confirmation modal configuration

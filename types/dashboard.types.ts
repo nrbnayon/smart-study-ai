@@ -1,51 +1,29 @@
+// types/dashboard.types.ts
+
+export interface StatItem {
+  value: number;
+  trend: string;
+  isUp: boolean;
+}
 
 export interface DashboardStats {
-  totalUsers: {
-    value: number;
-    trend: number;
-  };
-  totalLakes: {
-    value: number;
-    trend: number;
-  };
-  totalReports: {
-    value: number;
-    trend: number;
-  };
-  bassPornRequests: {
-    value: number;
-    trend: number;
-  };
-  totalCatches: {
-    value: number;
-    trend: number;
-  };
+  totalUsers: StatItem;
+  subscribedUsers: StatItem;
+  totalQuestions?: StatItem;
+  totalQuizzes?: StatItem;
 }
 
-export interface UserActivityData {
-  day: string;
-  users: number;
-}
-
-export interface ReportsSubmittedData {
-  week: string;
-  reports: number;
-}
-
-export interface RecentActivity {
-  id: string;
-  user: {
-    name: string;
-    avatar?: string;
-  };
-  action: string;
-  lake: string;
-  time: string;
+export interface RecentUserRegistration {
+  id: number | string;
+  name: string;
+  email: string;
+  signupDate: string;
+  status: "active" | "pending" | "inactive";
+  avatar?: string;
 }
 
 export interface DashboardData {
   stats: DashboardStats;
-  userActivity: UserActivityData[];
-  reportsSubmitted: ReportsSubmittedData[];
-  recentActivity: RecentActivity[];
+  recentUsers: RecentUserRegistration[];
 }
+

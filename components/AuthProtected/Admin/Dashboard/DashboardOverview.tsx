@@ -47,12 +47,13 @@ const DashboardOverview = () => {
     {
       key: "email",
       header: "EMAIL",
-      className: "text-[#64748B]",
+      className: "text-secondary",
     },
     {
       key: "signupDate",
       header: "SIGNUP DATE",
-      className: "text-foreground",
+      className: "text-secondary",
+      sortable: true,
     },
     {
       key: "status",
@@ -117,7 +118,7 @@ const DashboardOverview = () => {
         description="Welcome Back! Here's what's happening with your platform."
       />
 
-      <div className="p-4 md:p-8 space-y-8">
+      <div className="p-4 md:p-8 space-y-5">
         {/* Stats Cards - Only 2 as per Image 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatsCard
@@ -142,7 +143,7 @@ const DashboardOverview = () => {
 
         {/* Recent Registrations Table */}
         <div className="bg-white rounded-2xl border border-gray-100 flex flex-col shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)]">
-          <div className="flex items-center justify-between px-4 pt-6 pb-2">
+          <div className="flex items-center justify-between px-4 pt-6 pb-3">
             <h3 className="text-xl font-bold text-foreground">
               Recent User Registrations
             </h3>
@@ -157,8 +158,8 @@ const DashboardOverview = () => {
           <DynamicTable
             data={recentUsers}
             config={tableConfig}
-            pagination={{ enabled: true, pageSize: 10 }}
-            className="border-none shadow-[0px_6px_54px_0px_rgba(0,0,0,0.05)]"
+            pagination={{ enabled: false, pageSize: 10 }}
+            className="border-none shadow-none"
             headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
             rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
           />

@@ -500,7 +500,7 @@ export function DynamicTable<T extends Record<string, any>>({
                                   }}
                                   disabled={action.disabled?.(row)}
                                   className={cn(
-                                    "inline-flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent",
+                                    "inline-flex items-center justify-center min-w-[36px] min-h-[36px] px-2 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent",
                                     action.variant === "danger" &&
                                       "hover:bg-red-50 text-red-500 hover:border-red-100",
                                     action.variant === "success" &&
@@ -514,9 +514,15 @@ export function DynamicTable<T extends Record<string, any>>({
                                   )}
                                   title={action.tooltip || action.label}
                                   aria-label={action.label}
-                                >
-                                  {action.icon}
-                                </button>
+                                  >
+                                    {action.render ? (
+                                      action.render(row, rowIndex)
+                                    ) : action.icon ? (
+                                      action.icon
+                                    ) : (
+                                      action.label
+                                    )}
+                                  </button>
                               );
                             })}
                           </div>

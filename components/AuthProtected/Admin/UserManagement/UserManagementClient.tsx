@@ -14,6 +14,7 @@ import {
   Search,
   Filter,
   Users,
+  Crown,
 } from "lucide-react";
 import { TableColumn } from "@/types/table.types";
 import Image from "next/image";
@@ -109,7 +110,11 @@ export default function UserManagementClient() {
               : "bg-gray-100 text-gray-600",
           )}
         >
-          {plan === "Premium" && <span className="text-[10px]">👑</span>}
+          {plan === "Premium" && (
+            <span className="text-xs">
+              <Crown size={12} />
+            </span>
+          )}
           {plan}
         </div>
       ),
@@ -223,7 +228,7 @@ export default function UserManagementClient() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FDFDFF]">
+    <div className="min-h-screen flex flex-col">
       <DashboardHeader title="User Management" />
 
       <div className="p-4 md:p-6 space-y-6">

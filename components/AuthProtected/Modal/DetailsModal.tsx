@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import Image from "next/image";
 
 interface DetailsModalProps {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export default function DetailsModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-            className="relative w-full max-w-lg bg-white rounded-[24px] shadow-2xl overflow-hidden"
+            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-50 bg-[#FDFDFF]">
               <h3 className="text-xl font-bold text-[#1E293B]">{title}</h3>
@@ -47,7 +48,28 @@ export default function DetailsModal({
               </button>
             </div>
 
-            <div className="p-8 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-8 space-y-4 max-h-[70vh] overflow-y-auto scrollbar-hide">
+              {/* Profile Header in Modal */}
+              {data?.avatar && (
+                <div className="flex flex-col items-center gap-3 pb-6 border-b border-gray-50 mb-6">
+                  <div className="w-24 h-24 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center overflow-hidden shrink-0 relative shadow-inner">
+                    {data?.avatar &&
+                    (data.avatar.startsWith("/") ||
+                      data.avatar.startsWith("http") ||
+                      data.avatar.startsWith("data:")) ? (
+                      <Image
+                        src={data.avatar}
+                        alt={data.name || "User"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {Object.entries(data).map(([key, value]) => {
                 if (key === "id" || key === "avatar") return null;
 
@@ -99,7 +121,7 @@ export default function DetailsModal({
               })}
             </div>
 
-            <div className="flex justify-end p-6 bg-gray-50 border-t border-gray-50">
+            <div className="flex justify-end px-6 py-3 bg-gray-50 border-t border-gray-50">
               <button
                 onClick={onClose}
                 className="px-8 py-3 bg-destructive text-white font-bold rounded-xl hover:bg-destructive/90 transition-all shadow-lg shadow-gray-200 cursor-pointer active:scale-95"

@@ -144,10 +144,6 @@ const AUTH_ROUTES: string[] = [
  */
 const PUBLIC_ONLY_ROUTES: string[] = [
   "/success",
-  "/jobs",
-  "/lakes",
-  "/catches",
-  "/reports",
 ];
 
 /**

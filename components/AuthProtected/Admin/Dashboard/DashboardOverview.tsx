@@ -118,7 +118,7 @@ const DashboardOverview = () => {
         description="Welcome Back! Here's what's happening with your platform."
       />
 
-      <div className="p-4 md:p-8 space-y-5">
+      <div className="p-4 md:p-6 space-y-6">
         {/* Stats Cards - Only 2 as per Image 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatsCard
@@ -143,7 +143,7 @@ const DashboardOverview = () => {
 
         {/* Recent Registrations Table */}
         <div className="bg-white rounded-2xl border border-gray-100 flex flex-col shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)]">
-          <div className="flex items-center justify-between px-4 pt-6 pb-3">
+          <div className="flex items-center justify-between px-4 py-5">
             <h3 className="text-xl font-bold text-foreground">
               Recent User Registrations
             </h3>

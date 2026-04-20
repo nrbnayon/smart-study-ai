@@ -48,10 +48,11 @@ const extractMeProfile = (meResponse: unknown) => {
     : [];
 
   return {
+    id: typeof data.id === "string" ? data.id : undefined,
     name: typeof data.name === "string" ? data.name : "User",
     email: typeof data.email === "string" ? data.email : "",
     role: typeof data.role === "string" ? data.role : "",
-    avatar: typeof data.avatar === "string" ? data.avatar : null,
+    avatar: typeof data.image_url === "string" ? data.image_url : (typeof data.avatar === "string" ? data.avatar : null),
     permissions,
   };
 };
@@ -106,6 +107,7 @@ export const SignInForm = () => {
     ) {
       toast.info("Dev Mode: Bypassing authentication...");
       const dummyResponse = {
+        id: "dev-id",
         accessToken: "dev-bypass-token",
         refreshToken: "dev-bypass-refresh-token",
         role: "admin",
@@ -124,6 +126,7 @@ export const SignInForm = () => {
       dispatch(
         setCredentials({
           user: {
+            id: dummyResponse.id,
             name: dummyResponse.name,
             email: dummyResponse.email,
             role: dummyResponse.role,
@@ -157,6 +160,7 @@ export const SignInForm = () => {
       }
 
       let meProfile = {
+        id: response.id,
         name: response.name || "User",
         email: response.email,
         role: normalizedRole,
@@ -168,6 +172,7 @@ export const SignInForm = () => {
         const meResponse = await fetchCurrentUser().unwrap();
         const extracted = extractMeProfile(meResponse);
         meProfile = {
+          id: extracted.id || meProfile.id,
           name: extracted.name || meProfile.name,
           email: extracted.email || meProfile.email,
           role: (extracted.role || meProfile.role).toLowerCase(),
@@ -194,6 +199,7 @@ export const SignInForm = () => {
       }
 
       const userPayload = {
+        id: meProfile.id,
         name: meProfile.name,
         email: meProfile.email,
         role: meProfile.role,
@@ -207,6 +213,13 @@ export const SignInForm = () => {
           accessToken: response.accessToken,
         }),
       );
+
+      setAuthCookies({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+        userRole: response.role,
+        userEmail: response.email,
+      });
 
       toast.success("Logged in successfully!");
       router.push(safeRedirect || "/dashboard");
@@ -262,7 +275,7 @@ export const SignInForm = () => {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 auth-card shadow-lg w-full w-full sm:max-w-lg mx-auto p-5 sm:p-8"
+        className="space-y-4 auth-card shadow-lg w-full sm:max-w-lg mx-auto p-5 sm:p-8"
       >
         <div className="space-y-4">
           {/* Email */}

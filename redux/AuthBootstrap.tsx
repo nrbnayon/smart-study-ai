@@ -37,7 +37,7 @@ export default function AuthBootstrap() {
 
           if (refreshRes.ok) {
             const refreshPayload = await refreshRes.json();
-            effectiveAccessToken = refreshPayload?.access_token || null;
+            effectiveAccessToken = refreshPayload?.data?.access || refreshPayload?.data?.access_token || refreshPayload?.access || refreshPayload?.access_token || null;
 
             if (effectiveAccessToken) {
               dispatch(updateTokens({ accessToken: effectiveAccessToken }));
@@ -63,7 +63,7 @@ export default function AuthBootstrap() {
         );
 
         try {
-          const meRes = await fetch(`${API_BASE}/auth/me`, {
+          const meRes = await fetch(`${API_BASE}/profile/`, {
             method: "GET",
             credentials: "include",
             headers: { Authorization: `Bearer ${effectiveAccessToken}` },
@@ -76,10 +76,11 @@ export default function AuthBootstrap() {
             dispatch(
               setCredentials({
                 user: {
+                  id: me.id,
                   name: me.name || "User",
                   email: me.email || userEmail || "",
                   role: me.role || userRole,
-                  avatar: me.avatar || null,
+                  avatar: me.image_url || me.avatar || null,
                   permissions: me.permissions || [],
                 },
                 accessToken: effectiveAccessToken,

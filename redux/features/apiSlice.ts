@@ -5,10 +5,15 @@ import { logout, updateTokens } from "./authSlice";
 import { clearAuthCookies } from "@/lib/authCookies";
 
 interface RefreshTokenResponse {
-  message: string;
-  access_token: string;
-  expires_in: number;
-  expires_at: number;
+  message?: string;
+  access_token?: string;
+  access?: string;
+  data?: {
+    access?: string;
+    access_token?: string;
+  };
+  expires_in?: number;
+  expires_at?: number;
 }
 
 // ─── Base Query ───────────────────────────────────────────────────────────────
@@ -61,7 +66,7 @@ const baseQueryWithReauth: typeof baseQuery = async (
 
           if (refreshResult.data) {
             const responseData = refreshResult.data as RefreshTokenResponse;
-            const newAccessToken = responseData.access_token;
+            const newAccessToken = responseData.data?.access || responseData.data?.access_token || responseData.access || responseData.access_token;
 
             if (newAccessToken) {
               api.dispatch(

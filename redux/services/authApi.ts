@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // redux/services/authApi.ts
 import { apiSlice } from "../features/apiSlice";
 
@@ -8,6 +9,7 @@ interface SigninRequest {
 }
 
 interface SigninResponse {
+  id?: string;
   name: string;
   email: string;
   role: string;
@@ -17,22 +19,27 @@ interface SigninResponse {
   refreshToken: string;
 }
 
-type SigninProfileFields = Pick<
-  SigninResponse,
-  "name" | "email" | "avatar" | "permissions"
->;
+interface SigninApiUser {
+  id?: string;
+  email?: string;
+  role?: string;
+  name?: string;
+  avatar?: string | null;
+  permissions?: string[];
+}
 
-interface SigninApiData extends Partial<SigninProfileFields> {
-  access_token: string;
-  refresh_token: string;
-  user_role: string;
+interface SigninApiData {
+  access: string;
+  refresh: string;
+  user?: SigninApiUser;
 }
 
 interface SigninApiResponse {
   success: boolean;
-  status: number;
+  statusCode: number;
   message: string;
   data: SigninApiData;
+  timestamp?: string;
 }
 
 interface SignupRequest {
@@ -77,6 +84,31 @@ interface ResetPasswordResponse {
   success: boolean;
 }
 
+interface ProfileApiData {
+  id: string;
+  email: string;
+  name: string;
+  image_url: string;
+  description: string;
+  problems_solved: number;
+  study_minutes: number;
+  active_days: number;
+  two_factor_enabled: boolean;
+  badges: any[];
+  level: number;
+  created_at: string;
+  updated_at: string;
+  role?: string; // Adding optional role if backend provides it in profile
+}
+
+interface ProfileApiResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: ProfileApiData;
+  timestamp: string;
+}
+
 // Inject endpoints into the API slice
 export const authApi = apiSlice.injectEndpoints({
   overrideExisting: process.env.NODE_ENV === "development",
@@ -84,7 +116,7 @@ export const authApi = apiSlice.injectEndpoints({
     // Signin endpoint
     signin: builder.mutation<SigninResponse, SigninRequest>({
       query: (credentials) => ({
-        url: "/auth/login",
+        url: "/auth/login/",
         method: "POST",
         body: credentials,
       }),
@@ -92,13 +124,14 @@ export const authApi = apiSlice.injectEndpoints({
         const payload = response?.data;
 
         return {
-          accessToken: payload?.access_token || "",
-          refreshToken: payload?.refresh_token || "",
-          role: payload?.user_role || "user",
-          name: payload?.name || "User",
-          email: payload?.email || "",
-          avatar: payload?.avatar ?? null,
-          permissions: payload?.permissions || [],
+          id: payload?.user?.id,
+          accessToken: payload?.access || "",
+          refreshToken: payload?.refresh || "",
+          role: payload?.user?.role || "user",
+          name: payload?.user?.name || "User",
+          email: payload?.user?.email || "",
+          avatar: payload?.user?.avatar ?? null,
+          permissions: payload?.user?.permissions || [],
         };
       },
       invalidatesTags: ["Auth"],
@@ -156,9 +189,9 @@ export const authApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
-    // Get current user - profile (it can be profile, me, get user, etc. depending on your backend)
-    getCurrentUser: builder.query<unknown, void>({
-      query: () => "/auth/me",
+    // Get current user - profile
+    getCurrentUser: builder.query<ProfileApiResponse, void>({
+      query: () => "/profile/",
       providesTags: ["Auth"],
     }),
   }),

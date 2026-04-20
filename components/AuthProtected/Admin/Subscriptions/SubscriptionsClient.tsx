@@ -11,6 +11,7 @@ import DashboardHeader from "@/components/Shared/DashboardHeader";
 import { DynamicTable } from "@/components/Shared/DynamicTable";
 import { TableColumn } from "@/types/table.types";
 import { SubscriptionCard } from "./SubscriptionCard";
+import { toast } from "sonner";
 
 const PLAN_FEATURES = {
   Basic: [
@@ -36,15 +37,22 @@ export default function SubscriptionsClient() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
   const [plans, setPlans] = useState(PLAN_FEATURES);
+  const [isSaving, setIsSaving] = useState(false);
   const [search, setSearch] = useState("");
 
   const handleEditFeatures = (planName: "Basic" | "Premium") => {
     setActivePlanModal(planName);
   };
 
-  const handleSaveFeatures = (newFeatures: any[]) => {
+  const handleSaveFeatures = async (newFeatures: any[]) => {
     if (activePlanModal) {
+      setIsSaving(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
       setPlans((prev) => ({ ...prev, [activePlanModal]: newFeatures }));
+      setIsSaving(false);
+      setActivePlanModal(null);
+      toast.success(`${activePlanModal} plan features updated`);
     }
   };
 
@@ -235,6 +243,7 @@ export default function SubscriptionsClient() {
         onSave={handleSaveFeatures}
         planName={activePlanModal || ""}
         initialFeatures={activePlanModal ? plans[activePlanModal] : []}
+        isLoading={isSaving}
       />
 
       <AddEditUserModal

@@ -53,10 +53,15 @@ export default function FAQManagerTab() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState<string | null>(null);
 
+  const [isSaving, setIsSaving] = useState(false);
   // Accordion state
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const handleSaveFaq = (savedData: FAQData) => {
+  const handleSaveFaq = async (savedData: FAQData) => {
+    setIsSaving(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     if (savedData.id) {
       setFaqs(
         faqs.map((faq) =>
@@ -68,6 +73,8 @@ export default function FAQManagerTab() {
       setFaqs([...faqs, { ...savedData, id: `q${Date.now()}` }]);
       toast.success("FAQ added successfully");
     }
+    setIsSaving(false);
+    setIsFAQModalOpen(false);
   };
 
   const confirmDelete = () => {
@@ -190,6 +197,7 @@ export default function FAQManagerTab() {
         onClose={() => setIsFAQModalOpen(false)}
         onSave={handleSaveFaq}
         initialData={editingFAQ}
+        isLoading={isSaving}
       />
 
       <DeleteConfirmationModal

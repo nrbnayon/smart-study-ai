@@ -55,8 +55,8 @@ export default function UserManagementClient() {
 
   const { data: response, isLoading, isFetching } = useGetAllUsersQuery(getQueryParams());
   const [deleteUser] = useDeleteUserMutation();
-  const [createUser] = useCreateUserMutation();
-  const [updateUser] = useUpdateUserByIdMutation();
+  const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserByIdMutation();
 
   const users = response?.results || [];
   const totalCount = response?.count || 0;
@@ -344,6 +344,7 @@ export default function UserManagementClient() {
         onConfirm={handleAddEditConfirm}
         title={selectedUser ? "Edit User" : "Add New User"}
         user={selectedUser}
+        isLoading={isCreating || isUpdating}
       />
 
       <DeleteConfirmationModal

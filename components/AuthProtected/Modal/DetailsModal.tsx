@@ -79,9 +79,9 @@ export default function DetailsModal({
                 return (
                   <div
                     key={key}
-                    className="flex flex-col gap-1.5 border-b border-gray-50 pb-4 last:border-0"
+                    className="flex flex-col gap-1 border-b border-gray-50 pb-2 last:border-0"
                   >
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">
+                    <span className="text-xs font-bold text-secondary uppercase tracking-widest pl-1">
                       {key.replace(/([A-Z])/g, " $1").trim()}
                     </span>
                     {isStatus ? (

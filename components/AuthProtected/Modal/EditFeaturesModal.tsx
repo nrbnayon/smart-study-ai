@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface EditFeaturesModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface EditFeaturesModalProps {
   onSave: (features: any) => void;
   planName: string;
   initialFeatures: any[];
+  isLoading?: boolean;
 }
 
 export default function EditFeaturesModal({
@@ -19,6 +21,7 @@ export default function EditFeaturesModal({
   onSave,
   planName,
   initialFeatures,
+  isLoading,
 }: EditFeaturesModalProps) {
   const [features, setFeatures] = useState<any[]>(initialFeatures);
   const [prevInitialFeatures, setPrevInitialFeatures] =
@@ -34,6 +37,7 @@ export default function EditFeaturesModal({
   }
 
   const toggleFeature = (id: string) => {
+    if (isLoading) return;
     setFeatures((prev) =>
       prev.map((f) => (f.id === id ? { ...f, included: !f.included } : f)),
     );
@@ -41,7 +45,6 @@ export default function EditFeaturesModal({
 
   const handleSave = () => {
     onSave(features);
-    onClose();
   };
 
   return (
@@ -52,8 +55,8 @@ export default function EditFeaturesModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={isLoading ? undefined : onClose}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
           />
 
           <motion.div
@@ -75,7 +78,8 @@ export default function EditFeaturesModal({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 bg-gray-50 hover:bg-red-50 rounded-full text-secondary hover:text-red-500 transition-all cursor-pointer"
+                disabled={isLoading}
+                className="p-2 bg-gray-50 hover:bg-red-50 rounded-full text-secondary hover:text-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X size={20} />
               </button>
@@ -87,11 +91,13 @@ export default function EditFeaturesModal({
                 <div
                   key={feature.id}
                   onClick={() => toggleFeature(feature.id)}
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                  className={cn(
+                    "flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer shadow-sm",
                     feature.included
-                      ? "border-primary bg-primary/5"
-                      : "border-gray-100 bg-white hover:border-gray-200"
-                  }`}
+                      ? "border-primary bg-primary/5 shadow-primary/5"
+                      : "border-gray-100 bg-white hover:border-gray-200",
+                    isLoading && "opacity-50 pointer-events-none"
+                  )}
                 >
                   <span
                     className={`text-sm font-semibold ${
@@ -117,15 +123,24 @@ export default function EditFeaturesModal({
             <div className="p-6 bg-[#F8FAFC] border-t border-gray-100 flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 bg-white border border-gray-200 text-secondary font-bold rounded-xl hover:bg-gray-50 transition-all cursor-pointer text-sm"
+                disabled={isLoading}
+                className="flex-1 py-3 bg-white border border-gray-200 text-secondary font-bold rounded-xl hover:bg-gray-50 transition-all cursor-pointer text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 text-sm"
+                disabled={isLoading}
+                className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Save Changes
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </button>
             </div>
           </motion.div>

@@ -15,6 +15,7 @@ interface AddFAQModalProps {
   onClose: () => void;
   onSave: (data: FAQData) => void;
   initialData?: FAQData | null;
+  isLoading?: boolean;
 }
 
 export default function AddFAQModal({
@@ -22,6 +23,7 @@ export default function AddFAQModal({
   onClose,
   onSave,
   initialData,
+  isLoading,
 }: AddFAQModalProps) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -45,7 +47,6 @@ export default function AddFAQModal({
     e.preventDefault();
     if (!question.trim() || !answer.trim()) return;
     onSave({ id: initialData?.id, question, answer });
-    onClose();
   };
 
   const isEditing = !!initialData;
@@ -58,7 +59,7 @@ export default function AddFAQModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={isLoading ? undefined : onClose}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 overflow-y-auto w-full"
           />
           <motion.div
@@ -80,7 +81,8 @@ export default function AddFAQModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl transition-all cursor-pointer"
+                disabled={isLoading}
+                className="p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X size={20} />
               </button>
@@ -101,7 +103,8 @@ export default function AddFAQModal({
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     required
-                    className="w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all"
+                    disabled={isLoading}
+                    className="w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all disabled:opacity-60"
                     placeholder="e.g. How do I reset my password?"
                   />
                 </div>
@@ -116,7 +119,8 @@ export default function AddFAQModal({
                   onChange={(e) => setAnswer(e.target.value)}
                   required
                   rows={4}
-                  className="w-full p-4 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all resize-none"
+                  disabled={isLoading}
+                  className="w-full p-4 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all resize-none disabled:opacity-60"
                   placeholder="Provide a clear and helpful answer..."
                 />
               </div>
@@ -125,15 +129,24 @@ export default function AddFAQModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-1/2 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-foreground rounded-xl font-bold text-base transition-all cursor-pointer"
+                  disabled={isLoading}
+                  className="w-1/2 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-foreground rounded-xl font-bold text-base transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-3 bg-primary hover:bg-primary text-white rounded-xl font-bold text-base transition-all cursor-pointer shadow-sm"
+                  disabled={isLoading || !question.trim() || !answer.trim()}
+                  className="w-1/2 py-3 bg-primary hover:bg-primary text-white rounded-xl font-bold text-base transition-all cursor-pointer shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isEditing ? "Save Changes" : "Add FAQ"}
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    isEditing ? "Save Changes" : "Add FAQ"
+                  )}
                 </button>
               </div>
             </form>

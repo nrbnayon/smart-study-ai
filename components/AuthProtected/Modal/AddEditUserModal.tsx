@@ -2,17 +2,11 @@
 "use client";
 
 import { useState, useRef } from "react";
-import {
-  X,
-  User,
-  Mail,
-  Camera,
-  ToggleLeft,
-  Lock,
-} from "lucide-react";
+import { X, User, Mail, Camera, ToggleLeft, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { resolveMediaUrl } from "@/lib/utils";
+import { cn, resolveMediaUrl } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface AddEditUserModalProps {
   isOpen: boolean;
@@ -20,6 +14,7 @@ interface AddEditUserModalProps {
   onConfirm: (data: FormData) => void;
   title: string;
   user?: any;
+  isLoading?: boolean;
 }
 
 export default function AddEditUserModal({
@@ -28,6 +23,7 @@ export default function AddEditUserModal({
   onConfirm,
   title,
   user,
+  isLoading,
 }: AddEditUserModalProps) {
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -60,6 +56,15 @@ export default function AddEditUserModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Password validation
+    if (!user || formData.password) {
+      if (formData.password.length < 8) {
+        toast.error("Password must be at least 8 characters long");
+        return;
+      }
+    }
+
     const data = new FormData();
     data.append("name", formData.name);
     data.append("email", formData.email);
@@ -81,10 +86,10 @@ export default function AddEditUserModal({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData((prev) => ({ 
-        ...prev, 
+      setFormData((prev) => ({
+        ...prev,
         image: file,
-        imagePreview: URL.createObjectURL(file) 
+        imagePreview: URL.createObjectURL(file),
       }));
     }
   };
@@ -97,8 +102,8 @@ export default function AddEditUserModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={isLoading ? undefined : onClose}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
           />
 
           <motion.div
@@ -123,7 +128,8 @@ export default function AddEditUserModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 bg-gray-50 hover:bg-red-50 rounded-full text-secondary hover:text-red-500 transition-all cursor-pointer"
+                disabled={isLoading}
+                className="p-2 bg-gray-50 hover:bg-red-50 rounded-full text-secondary hover:text-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X size={20} />
               </button>
@@ -137,8 +143,11 @@ export default function AddEditUserModal({
               {/* Image Section */}
               <div className="flex flex-col items-center justify-center mb-4">
                 <div
-                  className="relative group cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "relative group cursor-pointer",
+                    isLoading && "opacity-50 pointer-events-none",
+                  )}
+                  onClick={() => !isLoading && fileInputRef.current?.click()}
                 >
                   <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gray-50 flex items-center justify-center relative transition-transform duration-300 group-hover:scale-105">
                     {formData.imagePreview ? (
@@ -166,7 +175,8 @@ export default function AddEditUserModal({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 text-md font-semibold text-primary/90 hover:text-primary transition-colors"
+                  disabled={isLoading}
+                  className="mt-4 text-md font-semibold text-primary/90 hover:text-primary transition-colors disabled:opacity-50"
                 >
                   Upload Profile Photo
                 </button>
@@ -194,10 +204,11 @@ export default function AddEditUserModal({
                       type="text"
                       name="name"
                       required
+                      disabled={isLoading}
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Alice Johnson"
-                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground"
+                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -216,10 +227,11 @@ export default function AddEditUserModal({
                       type="email"
                       name="email"
                       required
+                      disabled={isLoading}
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="jhon@example.com"
-                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground"
+                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -238,10 +250,15 @@ export default function AddEditUserModal({
                       type="password"
                       name="password"
                       required={!user}
+                      disabled={isLoading}
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder={user ? "Leave blank to keep unchanged" : "Set user password"}
-                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground"
+                      placeholder={
+                        user
+                          ? "Leave blank to keep unchanged"
+                          : "Set user password"
+                      }
+                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -249,12 +266,17 @@ export default function AddEditUserModal({
                 {/* Account Status */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2 text-md font-semibold text-foreground">
-                    <ToggleLeft className="text-secondary" size={18} /> Verified Account
+                    <ToggleLeft className="text-secondary" size={18} /> Verified
+                    Account
                   </div>
 
                   <div
-                    className="px-5 py-3 rounded-lg border border-gray-100 bg-[#F8FAFC]/50 flex items-center gap-4 cursor-pointer hover:border-gray-200 transition-colors shadow-sm"
+                    className={cn(
+                      "px-5 py-3 rounded-lg border border-gray-100 bg-[#F8FAFC]/50 flex items-center gap-4 cursor-pointer hover:border-gray-200 transition-colors shadow-sm",
+                      isLoading && "opacity-50 pointer-events-none",
+                    )}
                     onClick={() =>
+                      !isLoading &&
                       setFormData((prev) => ({
                         ...prev,
                         verified: !prev.verified,
@@ -263,16 +285,12 @@ export default function AddEditUserModal({
                   >
                     <div
                       className={`relative inline-flex h-7 w-11 shrink-0 items-center rounded-full transition-colors ${
-                        formData.verified
-                          ? "bg-primary"
-                          : "bg-gray-300"
+                        formData.verified ? "bg-primary" : "bg-gray-300"
                       }`}
                     >
                       <span
                         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
-                          formData.verified
-                            ? "translate-x-5"
-                            : "translate-x-1"
+                          formData.verified ? "translate-x-5" : "translate-x-1"
                         }`}
                       />
                     </div>
@@ -280,9 +298,7 @@ export default function AddEditUserModal({
                       <div className="flex items-center gap-2">
                         <div
                           className={`w-2 h-2 rounded-full ${
-                            formData.verified
-                              ? "bg-green-500"
-                              : "bg-secondary"
+                            formData.verified ? "bg-green-500" : "bg-secondary"
                           }`}
                         />
                         <span
@@ -310,15 +326,26 @@ export default function AddEditUserModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-8 py-3 bg-white border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition-all cursor-pointer text-base"
+                  disabled={isLoading}
+                  className="px-8 py-3 bg-white border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition-all cursor-pointer text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 text-base"
+                  disabled={isLoading}
+                  className="px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 text-base disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {user ? "Update User" : "Create User"}
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      {user ? "Updating..." : "Creating..."}
+                    </>
+                  ) : user ? (
+                    "Update User"
+                  ) : (
+                    "Create User"
+                  )}
                 </button>
               </div>
             </form>

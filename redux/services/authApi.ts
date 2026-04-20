@@ -117,7 +117,6 @@ interface ProfileApiData {
   level: number;
   created_at: string;
   updated_at: string;
-  role?: string; // Adding optional role if backend provides it in profile
 }
 
 interface ProfileApiResponse {

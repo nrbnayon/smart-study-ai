@@ -7,18 +7,17 @@ import {
   User,
   Mail,
   Camera,
-  Phone,
-  Crown,
   ToggleLeft,
   Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { resolveMediaUrl } from "@/lib/utils";
 
 interface AddEditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: any) => void;
+  onConfirm: (data: FormData) => void;
   title: string;
   user?: any;
 }
@@ -33,19 +32,15 @@ export default function AddEditUserModal({
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: user?.phone || "",
     password: "",
-    plan: user?.plan || "Basic",
-    status: user?.status || "Active",
-    avatar: user?.avatar || "",
+    verified: user?.account_status === "verified",
+    image: null as File | null,
+    imagePreview: user?.image ? resolveMediaUrl(user.image) : "",
   });
 
   const [prevUser, setPrevUser] = useState(user);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-  // Initialize form data only when modal opens or user changes
-  // We do this during render to avoid the "React hook useEffect has a missing dependency"
-  // or "Calling setState synchronously within an effect" warning
   if (isOpen !== prevIsOpen || user !== prevUser) {
     setPrevIsOpen(isOpen);
     setPrevUser(user);
@@ -53,11 +48,10 @@ export default function AddEditUserModal({
       setFormData({
         name: user?.name || "",
         email: user?.email || "",
-        phone: user?.phone || "",
         password: "",
-        plan: user?.plan || "Basic",
-        status: user?.status || "Active",
-        avatar: user?.avatar || "",
+        verified: user ? user.account_status === "verified" : true,
+        image: null,
+        imagePreview: user?.image ? resolveMediaUrl(user.image) : "",
       });
     }
   }
@@ -66,8 +60,15 @@ export default function AddEditUserModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onConfirm(formData);
-    onClose();
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("email", formData.email);
+    if (formData.password) data.append("password", formData.password);
+    data.append("verified", String(formData.verified));
+    if (formData.image) {
+      data.append("image", formData.image);
+    }
+    onConfirm(data);
   };
 
   const handleChange = (
@@ -80,19 +81,13 @@ export default function AddEditUserModal({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, avatar: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      setFormData((prev) => ({ 
+        ...prev, 
+        image: file,
+        imagePreview: URL.createObjectURL(file) 
+      }));
     }
   };
-
-  const hasValidAvatar =
-    formData.avatar &&
-    (formData.avatar.startsWith("/") ||
-      formData.avatar.startsWith("http") ||
-      formData.avatar.startsWith("data:"));
 
   return (
     <AnimatePresence>
@@ -111,7 +106,7 @@ export default function AddEditUserModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-            className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
@@ -137,18 +132,18 @@ export default function AddEditUserModal({
             {/* Form */}
             <form
               onSubmit={handleSubmit}
-              className="p-8 overflow-y-auto scrollbar-hide space-y-2 bg-white"
+              className="p-8 overflow-y-auto scrollbar-hide space-y-4 bg-white"
             >
               {/* Image Section */}
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-center mb-4">
                 <div
                   className="relative group cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gray-50 flex items-center justify-center relative transition-transform duration-300 group-hover:scale-105">
-                    {hasValidAvatar ? (
+                    {formData.imagePreview ? (
                       <Image
-                        src={formData.avatar}
+                        src={formData.imagePreview}
                         alt="Preview"
                         fill
                         className="object-cover"
@@ -168,15 +163,13 @@ export default function AddEditUserModal({
                     <Camera size={14} className="text-gray-600" />
                   </div>
                 </div>
-                <div className="mt-4 flex flex-col items-center">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="text-md font-semibold text-primary/90 hover:text-primary transition-colors"
-                  >
-                    Upload Profile Photo
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-4 text-md font-semibold text-primary/90 hover:text-primary transition-colors"
+                >
+                  Upload Profile Photo
+                </button>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -186,7 +179,7 @@ export default function AddEditUserModal({
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+              <div className="grid grid-cols-1 gap-y-4">
                 {/* Full Name */}
                 <div className="space-y-2">
                   <label className="text-md font-semibold text-foreground flex items-center gap-1">
@@ -231,37 +224,10 @@ export default function AddEditUserModal({
                   </div>
                 </div>
 
-                {/* Phone Number */}
+                {/* Password */}
                 <div className="space-y-2">
                   <label className="text-md font-semibold text-foreground flex items-center gap-1">
-                    Phone Number{" "}
-                    <span className="text-secondary font-normal text-sm ml-1">
-                      (optional)
-                    </span>
-                  </label>
-                  <div className="relative group">
-                    <Phone
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-primary transition-colors"
-                      size={18}
-                    />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="+00000000000"
-                      className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground"
-                    />
-                  </div>
-                </div>
-
-                {/* New Password */}
-                <div className="space-y-2">
-                  <label className="text-md font-semibold text-foreground flex items-center gap-1">
-                    New Password{" "}
-                    <span className="text-secondary font-normal text-sm ml-1">
-                      (optional)
-                    </span>
+                    {user ? "New Password (optional)" : "Password *"}
                   </label>
                   <div className="relative group">
                     <Lock
@@ -271,63 +237,19 @@ export default function AddEditUserModal({
                     <input
                       type="password"
                       name="password"
+                      required={!user}
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Leave blank to keep unchanged"
+                      placeholder={user ? "Leave blank to keep unchanged" : "Set user password"}
                       className="w-full pl-11 pr-4 py-3.5 bg-[#F8FAFC] border border-gray-100 rounded-lg text-base focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-medium placeholder:text-gray-300 text-foreground"
                     />
                   </div>
                 </div>
 
-                {/* Subscription Type */}
-                <div className="space-y-3 col-span-1 md:col-span-2">
-                  <div className="flex items-center gap-2 text-md font-semibold text-foreground">
-                    <Crown className="text-secondary" size={16} /> Subscription
-                    Type <span className="text-red-500">*</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, plan: "Basic" }))
-                      }
-                      className={`py-3.5 rounded-lg border flex items-center justify-center gap-2 font-semibold text-base transition-all bg-white ${
-                        formData.plan === "Basic"
-                          ? "text-foreground border-primary shadow-sm"
-                          : "border-gray-200 text-secondary hover:border-gray-300"
-                      }`}
-                    >
-                      Basic
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, plan: "Premium" }))
-                      }
-                      className={`py-3.5 rounded-lg border flex items-center justify-center gap-2 font-semibold text-base transition-all ${
-                        formData.plan === "Premium"
-                          ? "bg-primary/5 text-primary border-primary shadow-sm"
-                          : "bg-white border-gray-200 text-secondary hover:border-gray-300"
-                      }`}
-                    >
-                      <Crown
-                        size={18}
-                        className={
-                          formData.plan === "Premium"
-                            ? "text-primary fill-primary/20"
-                            : "text-secondary"
-                        }
-                      />{" "}
-                      Premium
-                    </button>
-                  </div>
-                </div>
-
                 {/* Account Status */}
-                <div className="space-y-3 col-span-1 md:col-span-2">
+                <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2 text-md font-semibold text-foreground">
-                    <ToggleLeft className="text-secondary" size={18} /> Account
-                    Status <span className="text-red-500">*</span>
+                    <ToggleLeft className="text-secondary" size={18} /> Verified Account
                   </div>
 
                   <div
@@ -335,21 +257,20 @@ export default function AddEditUserModal({
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
-                        status:
-                          prev.status === "Active" ? "Inactive" : "Active",
+                        verified: !prev.verified,
                       }))
                     }
                   >
                     <div
                       className={`relative inline-flex h-7 w-11 shrink-0 items-center rounded-full transition-colors ${
-                        formData.status === "Active"
+                        formData.verified
                           ? "bg-primary"
                           : "bg-gray-300"
                       }`}
                     >
                       <span
                         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
-                          formData.status === "Active"
+                          formData.verified
                             ? "translate-x-5"
                             : "translate-x-1"
                         }`}
@@ -359,25 +280,25 @@ export default function AddEditUserModal({
                       <div className="flex items-center gap-2">
                         <div
                           className={`w-2 h-2 rounded-full ${
-                            formData.status === "Active"
+                            formData.verified
                               ? "bg-green-500"
                               : "bg-secondary"
                           }`}
                         />
                         <span
                           className={`font-semibold text-base ${
-                            formData.status === "Active"
+                            formData.verified
                               ? "text-green-600"
                               : "text-gray-500"
                           }`}
                         >
-                          {formData.status}
+                          {formData.verified ? "Verified" : "Not Verified"}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-0.5">
-                        {formData.status === "Active"
-                          ? "User can access the platform"
-                          : "User is restricted from accessing the platform"}
+                        {formData.verified
+                          ? "User account is verified and active"
+                          : "User account is pending verification"}
                       </p>
                     </div>
                   </div>
@@ -385,23 +306,20 @@ export default function AddEditUserModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between gap-3 pt-5">
-                <div></div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-8 py-3 bg-white border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition-all cursor-pointer text-base"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 text-base"
-                  >
-                    Save User
-                  </button>
-                </div>
+              <div className="flex items-center justify-end gap-3 pt-6">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-8 py-3 bg-white border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition-all cursor-pointer text-base"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 text-base"
+                >
+                  {user ? "Update User" : "Create User"}
+                </button>
               </div>
             </form>
           </motion.div>

@@ -4,8 +4,7 @@
 import { useState } from "react";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
 import { DynamicTable } from "@/components/Shared/DynamicTable";
-import { userDummyData } from "@/data/userDummyData";
-import { cn } from "@/lib/utils";
+import { cn, resolveMediaUrl } from "@/lib/utils";
 import {
   Eye,
   PencilLine,
@@ -19,79 +18,79 @@ import {
 import { TableColumn } from "@/types/table.types";
 import Image from "next/image";
 import DetailsModal from "@/components/AuthProtected/Modal/DetailsModal";
-
 import AddEditUserModal from "@/components/AuthProtected/Modal/AddEditUserModal";
 import { DeleteConfirmationModal } from "@/components/Shared/DeleteConfirmationModal";
+import {
+  useGetAllUsersQuery,
+  useDeleteUserMutation,
+  useCreateUserMutation,
+  useUpdateUserByIdMutation,
+} from "@/redux/services/userApi";
+import { TableSkeleton } from "@/components/Skeleton/TableSkeleton";
+import { toast } from "sonner";
+import { User } from "@/types/users";
 
 export default function UserManagementClient() {
-  const [users, setUsers] = useState(userDummyData);
+  const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  // Map pill to API status
   const filterPills = ["All", "Premium", "Basic", "Active", "Inactive"];
 
-  const filteredData = users.filter((item) => {
-    // Search filter
-    const matchesSearch =
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.email.toLowerCase().includes(search.toLowerCase());
+  const getQueryParams = () => {
+    const params: any = { page: currentPage };
+    if (search) params.search = search;
+    if (activeFilter === "Premium") params.subscription_status = "monthly";
+    if (activeFilter === "Basic") params.subscription_status = "free";
+    if (activeFilter === "Active") params.account_status = "verified";
+    if (activeFilter === "Inactive") params.account_status = "not_verified";
+    return params;
+  };
 
-    // Category filter
-    let matchesCategory = true;
-    if (activeFilter === "Premium") matchesCategory = item.plan === "Premium";
-    else if (activeFilter === "Basic") matchesCategory = item.plan === "Basic";
-    else if (activeFilter === "Active")
-      matchesCategory = item.status === "Active";
-    else if (activeFilter === "Inactive")
-      matchesCategory = item.status === "Inactive";
+  const { data: response, isLoading, isFetching } = useGetAllUsersQuery(getQueryParams());
+  const [deleteUser] = useDeleteUserMutation();
+  const [createUser] = useCreateUserMutation();
+  const [updateUser] = useUpdateUserByIdMutation();
 
-    return matchesSearch && matchesCategory;
-  });
+  const users = response?.results || [];
+  const totalCount = response?.count || 0;
 
-  const columns: TableColumn<(typeof userDummyData)[0]>[] = [
+  const columns: TableColumn<User>[] = [
     {
       key: "id",
       header: "#",
       className: "text-secondary font-medium",
+      render: (id) => <span className="text-xs truncate w-16 inline-block">{id}</span>
     },
     {
       key: "name",
       header: "NAME",
-      render: (name: string, row) => {
-        const hasValidAvatar =
-          row.avatar &&
-          (row.avatar.startsWith("/") || row.avatar.startsWith("http"));
-
-        return (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/5 flex items-center justify-center overflow-hidden shrink-0">
-              {hasValidAvatar ? (
-                <Image
-                  src={row.avatar}
-                  alt={name}
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback handled by check, but extra safety
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              ) : (
-                <span className="text-primary font-bold text-sm uppercase">
-                  {name.substring(0, 2)}
-                </span>
-              )}
-            </div>
-            <span className="font-semibold text-foreground">{name}</span>
+      render: (name: string, row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/5 flex items-center justify-center overflow-hidden shrink-0">
+            {row.image ? (
+              <Image
+                src={resolveMediaUrl(row.image)}
+                alt={name}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-primary font-bold text-sm uppercase">
+                {name?.substring(0, 2) || "U"}
+              </span>
+            )}
           </div>
-        );
-      },
+          <span className="font-semibold text-foreground">{name || "Unnamed"}</span>
+        </div>
+      ),
     },
     {
       key: "email",
@@ -99,60 +98,64 @@ export default function UserManagementClient() {
       className: "text-secondary",
     },
     {
-      key: "plan",
+      key: "subscription_status",
       header: "PLAN",
-      render: (plan: string) => (
+      render: (status: string) => (
         <div
           className={cn(
-            "px-3 py-1 rounded-lg text-xs font-medium inline-flex items-center gap-1",
-            plan === "Premium"
+            "px-3 py-1 rounded-lg text-xs font-medium inline-flex items-center gap-1 capitalize",
+            status === "monthly" || status === "yearly"
               ? "bg-primary/10 text-primary"
               : "bg-gray-100 text-gray-600",
           )}
         >
-          {plan === "Premium" && (
+          {(status === "monthly" || status === "yearly") && (
             <span className="text-xs">
               <Crown size={12} />
             </span>
           )}
-          {plan}
+          {status}
         </div>
       ),
     },
     {
-      key: "status",
+      key: "account_status",
       header: "STATUS",
-      sortable: true,
       render: (status: string) => {
-        const isActive = status === "Active";
+        const isActive = status === "verified";
         return (
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "w-2 h-2 rounded-full",
-                isActive ? "bg-primary" : "bg-gray-300",
+                isActive ? "bg-[#10B981]" : "bg-gray-300",
               )}
             />
             <span
               className={cn(
                 "text-sm font-medium capitalize",
-                isActive ? "text-primary" : "text-gray-400",
+                isActive ? "text-[#10B981]" : "text-gray-400",
               )}
             >
-              {status}
+              {isActive ? "Active" : "Inactive"}
             </span>
           </div>
         );
       },
     },
     {
-      key: "joined",
+      key: "signup_date",
       header: "JOINED",
       className: "text-secondary",
+      render: (date: string) => new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
     },
   ];
 
-  const handleOpenDetails = (user: any) => {
+  const handleOpenDetails = (user: User) => {
     setSelectedUser(user);
     setIsDetailsModalOpen(true);
   };
@@ -162,42 +165,40 @@ export default function UserManagementClient() {
     setIsAddEditModalOpen(true);
   };
 
-  const handleOpenEdit = (user: any) => {
+  const handleOpenEdit = (user: User) => {
     setSelectedUser(user);
     setIsAddEditModalOpen(true);
   };
 
-  const handleOpenDelete = (user: any) => {
+  const handleOpenDelete = (user: User) => {
     setSelectedUser(user);
     setIsDeleteModalOpen(true);
   };
 
-  const handleAddEditConfirm = (formData: any) => {
-    if (selectedUser) {
-      // Edit logic
-      setUsers((prev) =>
-        prev.map((u) => (u.id === selectedUser.id ? { ...u, ...formData } : u)),
-      );
-    } else {
-      // Add logic
-      const newUser = {
-        ...formData,
-        id: users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1,
-        joined: new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
-        avatar: formData.name.substring(0, 2).toUpperCase(),
-      };
-      setUsers((prev) => [newUser, ...prev]);
+  const handleAddEditConfirm = async (formData: FormData) => {
+    try {
+      if (selectedUser) {
+        await updateUser({ id: selectedUser.id, formData }).unwrap();
+        toast.success("User updated successfully");
+      } else {
+        await createUser(formData).unwrap();
+        toast.success("User created successfully");
+      }
+      setIsAddEditModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Something went wrong");
     }
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (selectedUser) {
-      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
-      setIsDeleteModalOpen(false);
+      try {
+        await deleteUser(selectedUser.id).unwrap();
+        toast.success("User deleted successfully");
+        setIsDeleteModalOpen(false);
+      } catch (error: any) {
+        toast.error(error?.data?.message || "Failed to delete user");
+      }
     }
   };
 
@@ -205,24 +206,21 @@ export default function UserManagementClient() {
     {
       label: "View",
       icon: <Eye size={18} />,
-      onClick: (row: any) => handleOpenDetails(row),
-      className:
-        "hover:bg-blue-50 text-primary hover:text-primary cursor-pointer",
+      onClick: (row: User) => handleOpenDetails(row),
+      className: "hover:bg-blue-50 text-primary hover:text-primary cursor-pointer",
       variant: "primary" as const,
     },
     {
       label: "Edit",
       icon: <PencilLine size={18} />,
-      onClick: (row: any) => handleOpenEdit(row),
-      className:
-        "hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-pointer",
+      onClick: (row: User) => handleOpenEdit(row),
+      className: "hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-pointer",
     },
     {
       label: "Delete",
       icon: <Trash2 size={18} />,
-      onClick: (row: any) => handleOpenDelete(row),
-      className:
-        "hover:bg-red-50 text-red-500 hover:text-red-600 cursor-pointer",
+      onClick: (row: User) => handleOpenDelete(row),
+      className: "hover:bg-red-50 text-red-500 hover:text-red-600 cursor-pointer",
       variant: "danger" as const,
     },
   ];
@@ -234,14 +232,16 @@ export default function UserManagementClient() {
       <div className="p-4 md:p-6 space-y-6">
         {/* Search and Filters Bar */}
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] flex flex-wrap items-center gap-4">
-          {/* Search Box */}
           <div className="relative flex-1 min-w-[280px]">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search by name or email..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-12 pr-4 py-3 bg-[#F8FAFC] border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none text-foreground font-medium"
             />
           </div>
@@ -251,12 +251,14 @@ export default function UserManagementClient() {
               <Filter size={20} />
             </button>
 
-            {/* Filter Pills */}
             <div className="flex items-center gap-2">
               {filterPills.map((pill) => (
                 <button
                   key={pill}
-                  onClick={() => setActiveFilter(pill)}
+                  onClick={() => {
+                    setActiveFilter(pill);
+                    setCurrentPage(1);
+                  }}
                   className={cn(
                     "px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer",
                     activeFilter === pill
@@ -285,24 +287,37 @@ export default function UserManagementClient() {
             <div className="flex items-center gap-2 text-[#64748B]">
               <Users size={18} />
               <span className="text-sm font-semibold">
-                {filteredData.length} users found
+                {isLoading ? "Loading users..." : `${totalCount} users found`}
               </span>
             </div>
           </div>
 
-          <DynamicTable
-            data={filteredData}
-            config={{
-              columns,
-              showActions: true,
-              actionsLabel: "ACTIONS",
-              actions: tableActions,
-            }}
-            pagination={{ enabled: true, pageSize: 10 }}
-            className="border-none shadow-none"
-            headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
-            rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
-          />
+          {isLoading ? (
+            <TableSkeleton rowCount={10} />
+          ) : (
+            <DynamicTable
+              data={users}
+              config={{
+                columns,
+                showActions: true,
+                actionsLabel: "ACTIONS",
+                actions: tableActions,
+              }}
+              pagination={{
+                enabled: true,
+                pageSize: 10,
+                total: totalCount,
+                currentPage: currentPage,
+              }}
+              onPageChange={setCurrentPage}
+              className="border-none shadow-none"
+              headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
+              rowClassName={cn(
+                "hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors",
+                isFetching && "opacity-50"
+              )}
+            />
+          )}
         </div>
       </div>
 
@@ -310,7 +325,17 @@ export default function UserManagementClient() {
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         title="User Details"
-        data={selectedUser}
+        data={selectedUser ? {
+          Name: selectedUser.name,
+          Email: selectedUser.email,
+          "Subscription Status": selectedUser.subscription_status,
+          "Plan": selectedUser.current_plan,
+          "Account Status": selectedUser.account_status,
+          "Joined Date": new Date(selectedUser.signup_date).toLocaleDateString(),
+          "Start Date": selectedUser.start_date,
+          "Expiry Date": selectedUser.expiry_date,
+          avatar: selectedUser.image ? resolveMediaUrl(selectedUser.image) : null
+        } : null}
       />
 
       <AddEditUserModal

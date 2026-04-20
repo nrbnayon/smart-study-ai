@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -7,40 +6,51 @@ import DashboardHeader from "@/components/Shared/DashboardHeader";
 import { Users, Crown, ArrowUpRight } from "lucide-react";
 import { DynamicTable } from "@/components/Shared/DynamicTable";
 import { StatsCard } from "@/components/Shared/StatsCard";
-import { recentUsers } from "@/data/dashboardDummyData";
 import DetailsModal from "@/components/AuthProtected/Modal/DetailsModal";
-import { cn } from "@/lib/utils";
+import { cn, resolveMediaUrl } from "@/lib/utils";
 import Image from "next/image";
+import { useGetDashboardQuery } from "@/redux/services/dashboardApi";
+import { useGetAllUsersQuery } from "@/redux/services/userApi";
+import { TableSkeleton } from "@/components/Skeleton/TableSkeleton";
+import { User } from "@/types/users";
 
 const DashboardOverview = () => {
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const columns: TableColumn<(typeof recentUsers)[0]>[] = [
+  const { data: dashboardData, isLoading: isDashboardLoading } =
+    useGetDashboardQuery();
+  const { data: usersData, isLoading: isUsersLoading } = useGetAllUsersQuery({
+    page: 1,
+  });
+
+  const stats = dashboardData;
+  const recentUsers = usersData?.results?.slice(0, 7) || [];
+
+  const columns: TableColumn<User>[] = [
     {
       key: "name",
       header: "NAME",
       render: (name: string, row) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/50 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-            {row.avatar ? (
+          <div className="w-10 h-10 rounded-full bg-primary/10 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+            {row.image ? (
               <Image
-                src={row.avatar}
+                src={resolveMediaUrl(row.image)}
                 alt={name}
                 width={40}
                 height={40}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/images/avatar.png";
-                }}
               />
             ) : (
               <span className="text-primary font-bold text-sm uppercase">
-                {name.substring(0, 2)}
+                {name?.substring(0, 2) || "U"}
               </span>
             )}
           </div>
-          <span className="font-semibold text-foreground">{name}</span>
+          <span className="font-semibold text-foreground">
+            {name || "Unnamed"}
+          </span>
         </div>
       ),
     },
@@ -50,39 +60,37 @@ const DashboardOverview = () => {
       className: "text-secondary",
     },
     {
-      key: "signupDate",
+      key: "signup_date",
       header: "SIGNUP DATE",
       className: "text-secondary",
       sortable: true,
+      render: (date: string) =>
+        new Date(date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
     },
     {
-      key: "status",
+      key: "account_status",
       header: "STATUS",
       render: (status: string) => {
-        const s = status.toLowerCase();
+        const isActive = status === "verified";
         return (
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "w-2 h-2 rounded-full",
-                s === "active"
-                  ? "bg-[#10B981]"
-                  : s === "pending"
-                    ? "bg-[#F59E0B]"
-                    : "bg-gray-300",
+                isActive ? "bg-[#10B981]" : "bg-gray-300",
               )}
             />
             <span
               className={cn(
                 "text-sm font-medium capitalize",
-                s === "active"
-                  ? "text-[#10B981]"
-                  : s === "pending"
-                    ? "text-[#F59E0B]"
-                    : "text-gray-400",
+                isActive ? "text-[#10B981]" : "text-gray-400",
               )}
             >
-              {status}
+              {isActive ? "Active" : "Inactive"}
             </span>
           </div>
         );
@@ -97,7 +105,7 @@ const DashboardOverview = () => {
     actions: [
       {
         label: "View",
-        onClick: (row: any) => {
+        onClick: (row: User) => {
           setSelectedUser(row);
           setIsModalOpen(true);
         },
@@ -119,24 +127,28 @@ const DashboardOverview = () => {
       />
 
       <div className="p-4 md:p-6 space-y-6">
-        {/* Stats Cards - Only 2 as per Image 2 */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatsCard
             title="Total Users"
-            value="25"
+            value={isDashboardLoading ? "..." : String(stats?.total_users || 0)}
             icon={Users}
             iconBgColor="#EEF2FF"
             iconColor="#6366F1"
-            subtitle="+12%"
+            subtitle="Overall registered users"
             isUp={true}
           />
           <StatsCard
             title="Subscribed User"
-            value="20"
+            value={
+              isDashboardLoading ? "..." : String(stats?.subscribed_users || 0)
+            }
             icon={Crown}
             iconBgColor="#FFFBEB"
             iconColor="#E17100"
-            subtitle="+8%"
+            subtitle={
+              stats?.subscription_note || "Currently active subscriptions"
+            }
             isUp={true}
           />
         </div>
@@ -148,21 +160,26 @@ const DashboardOverview = () => {
               Recent User Registrations
             </h3>
             <Link
-              href="/users"
+              href="/user-management"
               className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
             >
               View all
               <ArrowUpRight size={16} />
             </Link>
           </div>
-          <DynamicTable
-            data={recentUsers}
-            config={tableConfig}
-            pagination={{ enabled: false, pageSize: 10 }}
-            className="border-none shadow-none"
-            headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
-            rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
-          />
+
+          {isUsersLoading ? (
+            <TableSkeleton rowCount={5} />
+          ) : (
+            <DynamicTable
+              data={recentUsers}
+              config={tableConfig}
+              pagination={{ enabled: false, pageSize: 5 }}
+              className="border-none shadow-none"
+              headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
+              rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
+            />
+          )}
         </div>
       </div>
 
@@ -170,7 +187,22 @@ const DashboardOverview = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="User Registration Details"
-        data={selectedUser}
+        data={
+          selectedUser
+            ? {
+                Name: selectedUser.name,
+                Email: selectedUser.email,
+                "Account Status": selectedUser.account_status,
+                "Subscription Status": selectedUser.subscription_status,
+                "Joined Date": new Date(
+                  selectedUser.signup_date,
+                ).toLocaleDateString(),
+                avatar: selectedUser.image
+                  ? resolveMediaUrl(selectedUser.image)
+                  : null,
+              }
+            : null
+        }
       />
     </div>
   );

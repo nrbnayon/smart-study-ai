@@ -1,16 +1,45 @@
 // types/user.ts
-export interface User {  
-  _id: string;
+
+export interface User {
+  id: string;
   name: string;
   email: string;
-  role: string | "admin" | "user" | "guest" | "creator";
-  avatar?: string;
-  status: "active" | "suspended" | "banned" | "pending" | "inactive"; 
-  location?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  phone?: string;
-  permissions?: string[];
   image?: string | null;
-  reports?: number;
+  signup_date: string;
+  account_status: "verified" | "not_verified";
+  subscription_status: string;
+  current_plan: string;
+  start_date: string;
+  expiry_date: string;
+}
+
+export interface UserApiResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: User;
+  };
+  timestamp: string;
+}
+
+export interface UserListApiResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: {
+      count: number;
+      next: string | null;
+      previous: string | null;
+      results: User[];
+    };
+  };
+  timestamp: string;
 }

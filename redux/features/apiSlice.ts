@@ -62,14 +62,14 @@ const baseQueryWithReauth: typeof baseQuery = async (
         try {
           const { refreshToken } = readAuthCookies();
           if (!refreshToken) {
-             throw new Error("No refresh token");
+            throw new Error("No refresh token");
           }
 
           const refreshResult = await baseQuery(
-            { 
-              url: "/auth/new/token/refresh/", 
+            {
+              url: "/auth/new/token/refresh/",
               method: "POST",
-              body: { refresh: refreshToken }
+              body: { refresh: refreshToken },
             },
             api,
             extraOptions,
@@ -77,7 +77,8 @@ const baseQueryWithReauth: typeof baseQuery = async (
 
           if (refreshResult.data) {
             const responseData = refreshResult.data as RefreshTokenResponse;
-            const newAccessToken = responseData.data?.access || responseData.access;
+            const newAccessToken =
+              responseData.data?.access || responseData.access;
 
             if (newAccessToken) {
               api.dispatch(
@@ -121,7 +122,7 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   // Define tag types for cache invalidation
-  tagTypes: ["User", "Auth", "Dashboard", "Profile", "Settings"],
+  tagTypes: ["User", "Auth", "Dashboard", "Profile", "Users", "Settings"],
   // Define endpoints in separate files and inject them here
   endpoints: () => ({}),
 });

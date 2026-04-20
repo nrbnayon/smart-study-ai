@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { TableColumn } from "@/types/table.types";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
-import { Users, Crown, ArrowUpRight } from "lucide-react";
+import { Users, Crown, ArrowUpRight, UserCheck, BookOpen } from "lucide-react";
 import { DynamicTable } from "@/components/Shared/DynamicTable";
 import { StatsCard } from "@/components/Shared/StatsCard";
 import DetailsModal from "@/components/AuthProtected/Modal/DetailsModal";
@@ -23,6 +23,15 @@ const DashboardOverview = () => {
   const { data: usersData, isLoading: isUsersLoading } = useGetAllUsersQuery({
     page: 1,
   });
+
+  const { data: activeUsersData, isLoading: isActiveUsersLoading } =
+    useGetAllUsersQuery({ account_status: "verified" });
+  const { data: basicSubscribersData, isLoading: isBasicSubscribersLoading } =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useGetAllUsersQuery({ subscription_status: "monthly" } as any);
+  const { data: premiumSubscribersData, isLoading: isPremiumSubscribersLoading } =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useGetAllUsersQuery({ subscription_status: "yearly" } as any);
 
   const stats = dashboardData;
   const recentUsers = usersData?.results?.slice(0, 7) || [];
@@ -128,27 +137,57 @@ const DashboardOverview = () => {
 
       <div className="p-4 md:p-6 space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Total Users"
             value={isDashboardLoading ? "..." : String(stats?.total_users || 0)}
             icon={Users}
             iconBgColor="#EEF2FF"
             iconColor="#6366F1"
-            subtitle="Overall registered users"
+            // subtitle="Overall registered users"
             isUp={true}
           />
           <StatsCard
-            title="Subscribed User"
+            title="Active Users"
             value={
-              isDashboardLoading ? "..." : String(stats?.subscribed_users || 0)
+              isActiveUsersLoading ? "..." : String(activeUsersData?.count || 0)
+            }
+            icon={UserCheck}
+            iconBgColor="#ECFDF5"
+            iconColor="#009966"
+            // subtitle={
+            //   stats?.subscription_note || "Currently active subscriptions"
+            // }
+            isUp={true}
+          />
+          <StatsCard
+            title="Premium Subscribers"
+            value={
+              isPremiumSubscribersLoading
+                ? "..."
+                : String(premiumSubscribersData?.count || 0)
             }
             icon={Crown}
             iconBgColor="#FFFBEB"
             iconColor="#E17100"
-            subtitle={
-              stats?.subscription_note || "Currently active subscriptions"
+            // subtitle={
+            //   stats?.subscription_note || "Currently active subscriptions"
+            // }
+            isUp={true}
+          />
+          <StatsCard
+            title="Basic Subscribers"
+            value={
+              isBasicSubscribersLoading
+                ? "..."
+                : String(basicSubscribersData?.count || 0)
             }
+            icon={BookOpen}
+            iconBgColor="#EFF6FF"
+            iconColor="#155DFC"
+            // subtitle={
+            //   stats?.subscription_note || "Currently active subscriptions"
+            // }
             isUp={true}
           />
         </div>

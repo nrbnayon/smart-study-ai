@@ -157,9 +157,9 @@ export default function SubscriptionsClient() {
       label: "Change Plan",
       onClick: (row: any) => handleChangePlan(row),
       render: () => (
-        <button className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-foreground font-bold text-xs transition-all cursor-pointer">
+        <span className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-foreground font-bold text-xs transition-all">
           Change Plan
-        </button>
+        </span>
       ),
     },
   ];

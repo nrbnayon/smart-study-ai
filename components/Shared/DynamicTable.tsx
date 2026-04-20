@@ -505,16 +505,36 @@ export function DynamicTable<T extends Record<string, any>>({
                                   <div key={actionIndex} className="w-9 h-9" />
                                 );
                               }
+                              const isCustomRender = !!action.render;
+                              const Tag = isCustomRender ? "div" : "button";
+
                               return (
-                                <button
+                                <Tag
                                   key={actionIndex}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleAction(action, row, globalIndex);
                                   }}
-                                  disabled={action.disabled?.(row)}
+                                  onKeyDown={(e) => {
+                                    if (
+                                      isCustomRender &&
+                                      (e.key === "Enter" || e.key === " ")
+                                    ) {
+                                      e.preventDefault();
+                                      handleAction(action, row, globalIndex);
+                                    }
+                                  }}
+                                  {...(Tag === "button"
+                                    ? { disabled: action.disabled?.(row) }
+                                    : {
+                                        role: "button",
+                                        tabIndex: 0,
+                                        "aria-disabled": action.disabled?.(row),
+                                      })}
                                   className={cn(
                                     "inline-flex items-center justify-center min-w-[36px] min-h-[36px] px-2 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent cursor-pointer",
+                                    action.disabled?.(row) &&
+                                      "opacity-50 cursor-not-allowed",
                                     action.variant === "danger" &&
                                       "hover:bg-red-50 text-red-500 hover:border-red-100",
                                     action.variant === "success" &&
@@ -534,7 +554,7 @@ export function DynamicTable<T extends Record<string, any>>({
                                     : action.icon
                                       ? action.icon
                                       : action.label}
-                                </button>
+                                </Tag>
                               );
                             })}
                           </div>

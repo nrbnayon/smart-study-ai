@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -23,7 +24,7 @@ import {
 import {
   useSigninMutation,
   useLogoutMutation,
-  useLazyGetCurrentUserQuery,
+  // useLazyGetCurrentUserQuery,
 } from "@/redux/services/authApi";
 import { toast } from "sonner";
 import { signinValidationSchema } from "@/lib/formDataValidation";
@@ -32,27 +33,21 @@ import Image from "next/image";
 
 type FormValues = z.infer<typeof signinValidationSchema>;
 
-const extractMeProfile = (meResponse: unknown) => {
-  const root =
-    meResponse && typeof meResponse === "object"
-      ? (meResponse as Record<string, unknown>)
-      : {};
-  const data =
-    root.data && typeof root.data === "object"
-      ? (root.data as Record<string, unknown>)
-      : root;
-
+const extractMeProfile = (meResponse: any) => {
+  const data = meResponse?.data || meResponse || {};
   const permissionsRaw = data.permissions;
   const permissions = Array.isArray(permissionsRaw)
-    ? permissionsRaw.filter((item): item is string => typeof item === "string")
+    ? permissionsRaw.filter(
+        (item: any): item is string => typeof item === "string",
+      )
     : [];
 
   return {
-    id: typeof data.id === "string" ? data.id : undefined,
-    name: typeof data.name === "string" ? data.name : "User",
-    email: typeof data.email === "string" ? data.email : "",
-    role: typeof data.role === "string" ? data.role : "",
-    avatar: typeof data.image_url === "string" ? data.image_url : (typeof data.avatar === "string" ? data.avatar : null),
+    id: data.id || undefined,
+    name: data.name || "User",
+    email: data.email || "",
+    role: data.role || "",
+    avatar: data.image_url || data.avatar || null,
     permissions,
   };
 };
@@ -63,7 +58,7 @@ export const SignInForm = () => {
   const dispatch = useAppDispatch();
   const [signin, { isLoading }] = useSigninMutation();
   const [logoutBackend] = useLogoutMutation();
-  const [fetchCurrentUser] = useLazyGetCurrentUserQuery();
+  // const [fetchCurrentUser] = useLazyGetCurrentUserQuery();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const safeRedirect =
@@ -149,16 +144,22 @@ export const SignInForm = () => {
       if (normalizedRole !== "admin") {
         try {
           await logoutBackend().unwrap();
-        } catch {
-          // If backend logout fails, still clear client-side auth state.
-        }
-
+        } catch {}
         clearAuthCookies();
         dispatch(logoutAction());
         toast.error("Access denied. Please use admin credentials to log in.");
         return;
       }
 
+      // 1. Set cookies immediately so the following fetchCurrentUser is authorized
+      setAuthCookies({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+        userRole: response.role,
+        userEmail: response.email,
+      });
+
+      // 2. Prepare profile with fallback to response data
       let meProfile = {
         id: response.id,
         name: response.name || "User",
@@ -168,62 +169,67 @@ export const SignInForm = () => {
         permissions: response.permissions || [],
       };
 
+      // 3. Fetch full profile to get image_url (avatar) and full name
       try {
-        const meResponse = await fetchCurrentUser().unwrap();
-        const extracted = extractMeProfile(meResponse);
-        meProfile = {
-          id: extracted.id || meProfile.id,
-          name: extracted.name || meProfile.name,
-          email: extracted.email || meProfile.email,
-          role: (extracted.role || meProfile.role).toLowerCase(),
-          avatar: extracted.avatar || meProfile.avatar,
-          permissions: extracted.permissions.length
-            ? extracted.permissions
-            : meProfile.permissions,
-        };
-      } catch {
-        // Keep login payload fallback when /me fetch fails.
+        const API_BASE =
+          process.env.NEXT_PUBLIC_API_URL ||
+          "https://6zpmb4x8-8025.inc1.devtunnels.ms";
+        const meRes = await fetch(`${API_BASE}/profile/`, {
+          headers: {
+            Authorization: `Bearer ${response.accessToken}`,
+          },
+        });
+
+        if (meRes.ok) {
+          const meResponse = await meRes.json();
+          const extracted = extractMeProfile(meResponse);
+
+          meProfile = {
+            ...meProfile,
+            id: extracted.id || meProfile.id,
+            name: extracted.name || meProfile.name,
+            email: extracted.email || meProfile.email,
+            role: (extracted.role || meProfile.role).toLowerCase(),
+            avatar: extracted.avatar || meProfile.avatar,
+            permissions: extracted.permissions?.length
+              ? extracted.permissions
+              : meProfile.permissions,
+          };
+        }
+      } catch (err) {
+        console.warn(
+          "Profile fetch failed, using login response fallback",
+          err,
+        );
       }
 
       if (meProfile.role !== "admin") {
         try {
           await logoutBackend().unwrap();
-        } catch {
-          // Ensure cleanup even if backend logout fails.
-        }
-
+        } catch {}
         clearAuthCookies();
         dispatch(logoutAction());
         toast.error("Access denied. Please use admin credentials to log in.");
         return;
       }
 
-      const userPayload = {
-        id: meProfile.id,
-        name: meProfile.name,
-        email: meProfile.email,
-        role: meProfile.role,
-        permissions: meProfile.permissions,
-        avatar: meProfile.avatar,
-      };
-
+      // 4. Update Redux with complete profile
       dispatch(
         setCredentials({
-          user: userPayload,
+          user: {
+            id: meProfile.id,
+            name: meProfile.name,
+            email: meProfile.email,
+            role: meProfile.role,
+            permissions: meProfile.permissions,
+            avatar: meProfile.avatar,
+          },
           accessToken: response.accessToken,
         }),
       );
 
-      setAuthCookies({
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-        userRole: response.role,
-        userEmail: response.email,
-      });
-
       toast.success("Logged in successfully!");
       router.push(safeRedirect || "/dashboard");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Signin error:", error);
       let message = "Signin failed. Please try again.";

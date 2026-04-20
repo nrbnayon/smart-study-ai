@@ -4,7 +4,6 @@
 import { useState } from "react";
 import { Crown, Search, Filter } from "lucide-react";
 import Image from "next/image";
-import { userDummyData } from "@/data/userDummyData";
 import AddEditUserModal from "@/components/AuthProtected/Modal/AddEditUserModal";
 import EditFeaturesModal from "@/components/AuthProtected/Modal/EditFeaturesModal";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
@@ -12,6 +11,10 @@ import { DynamicTable } from "@/components/Shared/DynamicTable";
 import { TableColumn } from "@/types/table.types";
 import { SubscriptionCard } from "./SubscriptionCard";
 import { toast } from "sonner";
+import { useGetAllUsersQuery } from "@/redux/services/userApi";
+import { resolveMediaUrl } from "@/lib/utils";
+import { User } from "@/types/users";
+import { TableSkeleton } from "@/components/Skeleton/TableSkeleton";
 
 const PLAN_FEATURES = {
   Basic: [
@@ -39,6 +42,22 @@ export default function SubscriptionsClient() {
   const [plans, setPlans] = useState(PLAN_FEATURES);
   const [isSaving, setIsSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data: userResponse, isLoading: isUsersLoading } = useGetAllUsersQuery({
+    search,
+    page: currentPage,
+  });
+
+  const allUsers = userResponse?.results || [];
+  const totalCount = userResponse?.count || 0;
+
+  // Calculate plan-specific subscribers from the current page/list
+  const basicCount = allUsers.filter((u) => u.subscription_status === "monthly")
+    .length;
+  const premiumCount = allUsers.filter(
+    (u) => u.subscription_status === "yearly",
+  ).length;
 
   const handleEditFeatures = (planName: "Basic" | "Premium") => {
     setActivePlanModal(planName);
@@ -56,46 +75,35 @@ export default function SubscriptionsClient() {
     }
   };
 
-  const handleChangePlan = (user: any) => {
+  const handleChangePlan = (user: User) => {
     setSelectedUser(user);
     setIsEditUserModalOpen(true);
   };
 
-  const filteredData = userDummyData.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.email.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const columns: TableColumn<(typeof userDummyData)[0]>[] = [
+  const columns: TableColumn<User>[] = [
     {
       key: "name",
       header: "NAME",
-      render: (name: string, row) => {
-        const hasValidAvatar =
-          row.avatar &&
-          (row.avatar.startsWith("/") || row.avatar.startsWith("http"));
-        return (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
-              {hasValidAvatar ? (
-                <Image
-                  src={row.avatar}
-                  alt={name}
-                  width={36}
-                  height={36}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-secondary font-bold text-xs uppercase">
-                  {name.substring(0, 2)}
-                </span>
-              )}
-            </div>
-            <span className="font-bold text-foreground text-sm">{name}</span>
+      render: (name: string, row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+            {row.image ? (
+              <Image
+                src={resolveMediaUrl(row.image)}
+                alt={name}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-primary font-bold text-sm uppercase">
+                {name?.substring(0, 2) || "U"}
+              </span>
+            )}
           </div>
-        );
-      },
+          <span className="font-semibold text-foreground">{name || "Unnamed"}</span>
+        </div>
+      ),
     },
     {
       key: "email",
@@ -103,26 +111,34 @@ export default function SubscriptionsClient() {
       className: "text-secondary text-sm font-medium",
     },
     {
-      key: "plan",
+      key: "subscription_status",
       header: "CURRENT PLAN",
-      render: (plan: string) =>
-        plan === "Premium" ? (
+      render: (status: string) => {
+        const isPremium = status === "monthly" || status === "yearly" || status === "Premium";
+        return isPremium ? (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/5 text-primary text-xs font-bold border border-primary/10">
-            <Crown size={12} className="fill-primary/10" /> Premium
+            <Crown size={12} className="fill-primary/10" /> {status}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-secondary text-xs font-bold border border-gray-100">
-            Basic
+            {status || "Basic"}
           </span>
-        ),
+        );
+      },
     },
     {
-      key: "joined",
+      key: "signup_date",
       header: "START DATE",
       className: "text-secondary text-sm font-medium",
+      render: (date: string) =>
+        new Date(date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
     },
     {
-      key: "expiryDate",
+      key: "expiry_date",
       header: "EXPIRY DATE",
       render: (expiryDate: string) => (
         <span className="text-secondary text-sm font-medium">
@@ -131,15 +147,14 @@ export default function SubscriptionsClient() {
       ),
     },
     {
-      key: "status",
+      key: "account_status",
       header: "STATUS",
-      render: (_, row: any) => {
-        const isExpired =
-          row.expiryDate && new Date(row.expiryDate) < new Date();
-        if (isExpired) {
+      render: (status: string) => {
+        const isActive = status === "verified";
+        if (!isActive) {
           return (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-50 text-red-500 text-xs font-bold">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500" /> Expired
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500" /> Inactive
             </span>
           );
         }
@@ -176,14 +191,14 @@ export default function SubscriptionsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
           <SubscriptionCard
             planType="Basic"
-            subscribersCount={13}
+            subscribersCount={basicCount}
             features={plans.Basic}
             onEditFeatures={handleEditFeatures}
           />
 
           <SubscriptionCard
             planType="Premium"
-            subscribersCount={12}
+            subscribersCount={premiumCount}
             features={plans.Premium}
             onEditFeatures={handleEditFeatures}
             price="$9.99"
@@ -198,7 +213,7 @@ export default function SubscriptionsClient() {
                 Subscriber List
               </h3>
               <p className="text-sm text-secondary font-medium">
-                {filteredData.length} total subscribers
+                {totalCount} total subscribers
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -211,7 +226,10 @@ export default function SubscriptionsClient() {
                   type="text"
                   placeholder="Search subscribers..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:outline-none focus:border-primary w-full md:w-64"
                 />
               </div>
@@ -221,19 +239,29 @@ export default function SubscriptionsClient() {
             </div>
           </div>
 
-          <DynamicTable
-            data={filteredData}
-            config={{
-              columns,
-              showActions: true,
-              actionsLabel: "ACTION",
-              actions: tableActions as any,
-            }}
-            pagination={{ enabled: true, pageSize: 10 }}
-            className="border-none shadow-none"
-            headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
-            rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
-          />
+          {isUsersLoading ? (
+            <TableSkeleton rowCount={8} />
+          ) : (
+            <DynamicTable
+              data={allUsers}
+              config={{
+                columns,
+                showActions: true,
+                actionsLabel: "ACTION",
+                actions: tableActions as any,
+              }}
+              pagination={{
+                enabled: true,
+                pageSize: 10,
+                total: totalCount,
+                currentPage: currentPage,
+              }}
+              onPageChange={setCurrentPage}
+              className="border-none shadow-none"
+              headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
+              rowClassName="hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors"
+            />
+          )}
         </div>
       </div>
 

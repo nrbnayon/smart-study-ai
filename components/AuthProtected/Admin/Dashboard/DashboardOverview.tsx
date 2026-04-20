@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -24,17 +25,20 @@ const DashboardOverview = () => {
     page: 1,
   });
 
-  const { data: activeUsersData, isLoading: isActiveUsersLoading } =
-    useGetAllUsersQuery({ account_status: "verified" });
-  const { data: basicSubscribersData, isLoading: isBasicSubscribersLoading } =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useGetAllUsersQuery({ subscription_status: "monthly" } as any);
-  const { data: premiumSubscribersData, isLoading: isPremiumSubscribersLoading } =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useGetAllUsersQuery({ subscription_status: "yearly" } as any);
-
   const stats = dashboardData;
-  const recentUsers = usersData?.results?.slice(0, 7) || [];
+  const allUsers = usersData?.results || [];
+  const recentUsers = allUsers.slice(0, 7);
+
+  // Calculate counts client-side from available data
+  const verifiedCount = allUsers.filter(
+    (u: any) => u.account_status === "verified",
+  ).length;
+  const basicCount = allUsers.filter(
+    (u: any) => u.subscription_status === "monthly",
+  ).length;
+  const premiumCount = allUsers.filter(
+    (u: any) => u.subscription_status === "yearly",
+  ).length;
 
   const columns: TableColumn<User>[] = [
     {
@@ -149,9 +153,7 @@ const DashboardOverview = () => {
           />
           <StatsCard
             title="Active Users"
-            value={
-              isActiveUsersLoading ? "..." : String(activeUsersData?.count || 0)
-            }
+            value={isUsersLoading ? "..." : String(verifiedCount)}
             icon={UserCheck}
             iconBgColor="#ECFDF5"
             iconColor="#009966"
@@ -162,11 +164,7 @@ const DashboardOverview = () => {
           />
           <StatsCard
             title="Premium Subscribers"
-            value={
-              isPremiumSubscribersLoading
-                ? "..."
-                : String(premiumSubscribersData?.count || 0)
-            }
+            value={isUsersLoading ? "..." : String(premiumCount)}
             icon={Crown}
             iconBgColor="#FFFBEB"
             iconColor="#E17100"
@@ -177,11 +175,7 @@ const DashboardOverview = () => {
           />
           <StatsCard
             title="Basic Subscribers"
-            value={
-              isBasicSubscribersLoading
-                ? "..."
-                : String(basicSubscribersData?.count || 0)
-            }
+            value={isUsersLoading ? "..." : String(basicCount)}
             icon={BookOpen}
             iconBgColor="#EFF6FF"
             iconColor="#155DFC"

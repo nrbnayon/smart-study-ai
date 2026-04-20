@@ -16,7 +16,10 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { emailValidationSchema } from "@/lib/formDataValidation";
-import { useForgotPasswordMutation } from "@/redux/services/authApi";
+import { 
+  useForgotPasswordMutation,
+  useResendOtpMutation 
+} from "@/redux/services/authApi";
 import { LeftSideImage } from "./LeftSideImage";
 
 type FormValues = z.infer<typeof emailValidationSchema>;
@@ -24,7 +27,9 @@ type FormValues = z.infer<typeof emailValidationSchema>;
 const ForgetPassword = () => {
   const [countdown, setCountdown] = useState(0);
   const router = useRouter();
-  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const [forgotPassword, { isLoading: isForgotLoading }] = useForgotPasswordMutation();
+  const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
+  const isLoading = isForgotLoading || isResending;
 
   const {
     register,
@@ -75,7 +80,7 @@ const ForgetPassword = () => {
       return;
     }
     try {
-      const result = await forgotPassword({ email }).unwrap();
+      const result = await resendOtp({ email }).unwrap();
       toast.success(result?.message || "OTP resent to your email.");
       setCountdown(60);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -10,7 +10,8 @@ import {
 } from "@/redux/features/authSlice";
 import { clearAuthCookies, readAuthCookies } from "@/lib/authCookies";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "https://6zpmb4x8-8025.inc1.devtunnels.ms";
 
 export default function AuthBootstrap() {
   const dispatch = useAppDispatch();
@@ -29,15 +30,16 @@ export default function AuthBootstrap() {
 
       if (!effectiveAccessToken && userRole && refreshToken) {
         try {
-          const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+          const refreshRes = await fetch(`${API_BASE}/auth/new/token/refresh/`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh: refreshToken }),
           });
 
           if (refreshRes.ok) {
             const refreshPayload = await refreshRes.json();
-            effectiveAccessToken = refreshPayload?.data?.access || refreshPayload?.data?.access_token || refreshPayload?.access || refreshPayload?.access_token || null;
+            effectiveAccessToken = refreshPayload?.data?.access || refreshPayload?.access || null;
 
             if (effectiveAccessToken) {
               dispatch(updateTokens({ accessToken: effectiveAccessToken }));

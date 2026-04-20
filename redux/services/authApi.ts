@@ -56,12 +56,29 @@ interface SignupResponse {
 
 interface VerifyOtpRequest {
   email: string;
-  otp: string;
+  otp_code: string;
 }
 
 interface VerifyOtpResponse {
+  success: boolean;
+  statusCode: number;
   message: string;
-  verified: boolean;
+  data: {
+    secret_key: string;
+  };
+}
+
+interface ResendOtpRequest {
+  email: string;
+}
+
+interface ResendOtpResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    email: string;
+  };
 }
 
 interface ForgotPasswordRequest {
@@ -74,14 +91,16 @@ interface ForgotPasswordResponse {
 }
 
 interface ResetPasswordRequest {
-  email: string;
-  otp: string;
-  newPassword: string;
+  user_email: string;
+  secret_key: string;
+  new_password: string;
 }
 
 interface ResetPasswordResponse {
-  message: string;
   success: boolean;
+  statusCode: number;
+  message: string;
+  data: any;
 }
 
 interface ProfileApiData {
@@ -150,9 +169,18 @@ export const authApi = apiSlice.injectEndpoints({
     // Verify OTP endpoint
     verifyOtp: builder.mutation<VerifyOtpResponse, VerifyOtpRequest>({
       query: (otpData) => ({
-        url: "/auth/verify-otp",
+        url: "/auth/new/verify-otp/",
         method: "POST",
         body: otpData,
+      }),
+    }),
+
+    // Resend OTP endpoint
+    resendOtp: builder.mutation<ResendOtpResponse, ResendOtpRequest>({
+      query: (data) => ({
+        url: "/auth/resend-otp/",
+        method: "POST",
+        body: data,
       }),
     }),
 
@@ -162,7 +190,7 @@ export const authApi = apiSlice.injectEndpoints({
       ForgotPasswordRequest
     >({
       query: (data) => ({
-        url: "/auth/forgot-password",
+        url: "/auth/forgot-password/",
         method: "POST",
         body: data,
       }),
@@ -174,7 +202,7 @@ export const authApi = apiSlice.injectEndpoints({
       ResetPasswordRequest
     >({
       query: (data) => ({
-        url: "/auth/reset-password",
+        url: "/auth/new/reset-password/",
         method: "POST",
         body: data,
       }),
@@ -183,7 +211,7 @@ export const authApi = apiSlice.injectEndpoints({
     // Logout endpoint
     logout: builder.mutation<{ message: string }, void>({
       query: () => ({
-        url: "/auth/logout",
+        url: "/auth/logout/",
         method: "POST",
       }),
       invalidatesTags: ["Auth"],
@@ -202,6 +230,7 @@ export const {
   useSigninMutation,
   useSignupMutation,
   useVerifyOtpMutation,
+  useResendOtpMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useLogoutMutation,

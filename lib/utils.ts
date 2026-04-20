@@ -18,7 +18,9 @@ export function truncateText(text: string, maxLength: number = 100): string {
 export const resolveMediaUrl = (url?: string | null) => {
   if (!url) return "";
   
-  const mediaBase = process.env.NEXT_PUBLIC_MEDIA_URL || "http://localhost:5000";
+  const mediaBase =
+    process.env.NEXT_PUBLIC_MEDIA_URL ||
+    "https://6zpmb4x8-8025.inc1.devtunnels.ms";
   
   // If it's already a full external URL, a blob URL, or a data URI, return as is
   // But if it contains localhost:5000, we still want to replace it with mediaBase

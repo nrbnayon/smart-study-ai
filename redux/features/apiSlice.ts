@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
 import { logout, updateTokens } from "./authSlice";
-import { clearAuthCookies } from "@/lib/authCookies";
+import { clearAuthCookies, readAuthCookies } from "@/lib/authCookies";
 
 interface RefreshTokenResponse {
   message?: string;
@@ -20,7 +20,9 @@ interface RefreshTokenResponse {
 
 const baseQuery = fetchBaseQuery({
   // The API base URL – endpoints already include /api/...
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseUrl:
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://6zpmb4x8-8025.inc1.devtunnels.ms",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
@@ -58,15 +60,24 @@ const baseQueryWithReauth: typeof baseQuery = async (
     if (!refreshPromise) {
       refreshPromise = (async () => {
         try {
+          const { refreshToken } = readAuthCookies();
+          if (!refreshToken) {
+             throw new Error("No refresh token");
+          }
+
           const refreshResult = await baseQuery(
-            { url: "/auth/refresh", method: "POST" },
+            { 
+              url: "/auth/new/token/refresh/", 
+              method: "POST",
+              body: { refresh: refreshToken }
+            },
             api,
             extraOptions,
           );
 
           if (refreshResult.data) {
             const responseData = refreshResult.data as RefreshTokenResponse;
-            const newAccessToken = responseData.data?.access || responseData.data?.access_token || responseData.access || responseData.access_token;
+            const newAccessToken = responseData.data?.access || responseData.access;
 
             if (newAccessToken) {
               api.dispatch(

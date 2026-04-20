@@ -9,6 +9,7 @@ import {
   selectIsHydrated,
 } from "@/redux/features/authSlice";
 import { clearAuthCookies } from "@/lib/authCookies";
+import { useLogoutMutation } from "@/redux/services/authApi";
 
 export interface UserInfo {
   name: string | null;
@@ -23,6 +24,7 @@ export interface UserInfo {
 export function useUser() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const [logoutBackend] = useLogoutMutation();
 
   const redUser = useAppSelector(selectCurrentUser);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -31,20 +33,17 @@ export function useUser() {
   const hasRole = (role: string) => redUser?.role === role;
 
   const logout = async () => {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-
     try {
-      await fetch(`${apiBase}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {
-      // Continue with local cleanup even if backend logout fails.
+      // Attempt backend logout but don't let it block frontend cleanup
+      await logoutBackend().unwrap();
+    } catch (error) {
+      console.warn("Backend logout failed, proceeding with local cleanup:", error);
+    } finally {
+      // Forcefully clear all local auth state regardless of backend result
+      dispatch(logoutAction());
+      clearAuthCookies();
+      router.push("/signin");
     }
-
-    dispatch(logoutAction());
-    clearAuthCookies();
-    router.push("/");
   };
 
   const hasPermission = (atom: string) => {

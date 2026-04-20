@@ -20,7 +20,7 @@ import {
 import { toast } from "sonner";
 import {
   useVerifyOtpMutation,
-  useForgotPasswordMutation,
+  useResendOtpMutation,
 } from "@/redux/services/authApi";
 import { LeftSideImage } from "./LeftSideImage";
 
@@ -40,8 +40,7 @@ const VerifyOtpContent = () => {
   const email = searchParams.get("email") || "";
 
   const [verifyOtp, { isLoading: isVerifying }] = useVerifyOtpMutation();
-  const [forgotPassword, { isLoading: isResending }] =
-    useForgotPasswordMutation();
+  const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
   const isLoading = isVerifying || isResending;
 
   const {
@@ -69,12 +68,7 @@ const VerifyOtpContent = () => {
     }
 
     try {
-      let result;
-      if (flow === "reset") {
-        result = await forgotPassword({ email }).unwrap();
-      } else {
-        result = await forgotPassword({ email }).unwrap();
-      }
+      const result = await resendOtp({ email }).unwrap();
       toast.success(result?.message || `A new code has been sent to ${email}`);
       setCountdown(180);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,12 +82,13 @@ const VerifyOtpContent = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const result = await verifyOtp({ email, otp: data.otp }).unwrap();
+      const result = await verifyOtp({ email, otp_code: data.otp }).unwrap();
       toast.success(result?.message || "Verification successful!");
 
       if (flow === "reset") {
+        const secretKey = result?.data?.secret_key;
         router.push(
-          `/reset-password?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(data.otp)}`,
+          `/reset-password?email=${encodeURIComponent(email)}&secret_key=${encodeURIComponent(secretKey)}`,
         );
       } else {
         router.push("/signin");

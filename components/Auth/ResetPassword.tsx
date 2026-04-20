@@ -24,7 +24,7 @@ const resetPasswordSchema = z
     newPassword: z
       .string()
       .min(1, "Password is required")
-      .min(6, "Password must be at least 6 characters"),
+      .min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -40,7 +40,7 @@ const ResetPasswordContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
-  const otp = searchParams.get("otp") || "";
+  const secret_key = searchParams.get("secret_key") || "";
 
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
@@ -58,11 +58,11 @@ const ResetPasswordContent = () => {
   });
 
   useEffect(() => {
-    if (!email || !otp) {
+    if (!email || !secret_key) {
       toast.error("Invalid reset link. Please start over.");
       router.push("/forgot-password");
     }
-  }, [email, otp, router]);
+  }, [email, secret_key, router]);
 
   const handleTrimChange = (field: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const trimmed = e.target.value.trim();
@@ -72,9 +72,9 @@ const ResetPasswordContent = () => {
   const onSubmit = async (data: FormValues) => {
     try {
       const result = await resetPassword({
-        email,
-        otp,
-        newPassword: data.newPassword
+        user_email: email,
+        secret_key,
+        new_password: data.newPassword
       }).unwrap();
       
       toast.success(result?.message || "Password reset successfully!");

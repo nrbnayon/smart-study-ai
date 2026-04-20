@@ -155,7 +155,7 @@ export const SignInForm = () => {
 
         clearAuthCookies();
         dispatch(logoutAction());
-        toast.error("Access denied. Only admin users can log in.");
+        toast.error("Access denied. Please use admin credentials to log in.");
         return;
       }
 
@@ -194,7 +194,7 @@ export const SignInForm = () => {
 
         clearAuthCookies();
         dispatch(logoutAction());
-        toast.error("Access denied. Only admin users can log in.");
+        toast.error("Access denied. Please use admin credentials to log in.");
         return;
       }
 

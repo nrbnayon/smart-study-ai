@@ -81,8 +81,8 @@ const Pricing = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
               className={`relative p-8 rounded-3xl border ${
-                plan.popular 
-                  ? "border-indigo-600 shadow-2xl scale-105 z-10 bg-indigo-50/30" 
+                plan.popular
+                  ? "border-indigo-600 shadow-2xl scale-105 z-10 bg-indigo-50/30"
                   : "border-gray-100 bg-white"
               } transition-all`}
             >
@@ -92,20 +92,26 @@ const Pricing = () => {
                   MOST POPULAR
                 </div>
               )}
-              
+
               <div className="mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  {plan.name}
+                </h3>
                 <p className="text-gray-500 text-sm mb-6">{plan.description}</p>
                 <div className="flex items-baseline">
-                  <span className="text-4xl font-black text-gray-900">${plan.price}</span>
-                  <span className="text-gray-500 ml-1">/month</span>
+                  <span className="text-4xl font-black text-gray-900">
+                    ${plan.price}
+                  </span>
+                  <span className="text-gray-500 ml-1">/yearly</span>
                 </div>
               </div>
 
               <div className="space-y-4 mb-10">
                 {plan.features.map((feature, fIndex) => (
                   <div key={fIndex} className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.popular ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-600"}`}>
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.popular ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-600"}`}
+                    >
                       <Check size={12} strokeWidth={3} />
                     </div>
                     <span className="text-gray-700 text-sm">{feature}</span>
@@ -113,10 +119,10 @@ const Pricing = () => {
                 ))}
               </div>
 
-              <Button 
+              <Button
                 className={`w-full py-6 rounded-2xl font-bold text-lg transition-all ${
-                  plan.popular 
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200" 
+                  plan.popular
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200"
                     : "bg-white border-2 border-gray-100 hover:border-indigo-600 hover:text-indigo-600 text-gray-900"
                 }`}
               >

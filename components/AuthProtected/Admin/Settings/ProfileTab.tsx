@@ -1,57 +1,82 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { BookOpen, User, Upload, Lightbulb, Mail } from "lucide-react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useGetAdminProfileQuery,
+  useUpdateAdminProfileMutation,
+} from "@/redux/services/settingsApi";
 import { toast } from "sonner";
 
 const profileSchema = z.object({
-  displayName: z
+  name: z
     .string()
-    .min(3, "Display name must be at least 3 characters")
-    .max(50, "Display name must be at most 50 characters"),
+    .min(3, "Name must be at least 3 characters")
+    .max(50, "Name must be at most 50 characters"),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfileTab() {
+  const { data: profile } = useGetAdminProfileQuery();
+  const [updateProfile] = useUpdateAdminProfileMutation();
+
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      displayName: "Admin User",
+      name: profile?.name || "Admin User",
     },
   });
+
+  // Sync form when profile data loads
+  React.useEffect(() => {
+    if (profile) {
+      reset({ name: profile.name });
+      if (profile.image) setLogoPreview(profile.image);
+    }
+  }, [profile, reset]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("File size must be less than 2MB");
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB");
         return;
       }
-      const previewUrl = URL.createObjectURL(file);
-      setLogoPreview(previewUrl);
-      toast.success(
-        "Logo uploaded successfully. Don't forget to save changes!",
-      );
+      setSelectedFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+      toast.success("Logo selected. Don't forget to save changes!");
     }
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log(data);
-    toast.success("Admin information updated successfully!");
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      await updateProfile(formData).unwrap();
+      toast.success("Admin profile updated successfully!");
+      setSelectedFile(null);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update profile");
+    }
   };
 
   return (
@@ -103,7 +128,7 @@ export default function ProfileTab() {
                 Platform Logo
               </h4>
               <p className="text-sm font-medium text-secondary">
-                PNG, JPG or GIF — max 2 MB. Recommended: 256×256px
+                PNG, JPG or GIF — max 5 MB. Recommended: 256×256px
               </p>
             </div>
             <input
@@ -156,7 +181,7 @@ export default function ProfileTab() {
         <div className="p-5 space-y-4">
           <div className="space-y-2">
             <label className="text-base font-bold text-foreground block">
-              Display Name <span className="text-red-500">*</span>
+              Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <User
@@ -164,19 +189,19 @@ export default function ProfileTab() {
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
-                {...register("displayName")}
+                {...register("name")}
                 type="text"
                 className={`w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none transition-all ${
-                  errors.displayName
+                  errors.name
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-100 focus:border-primary"
                 }`}
-                placeholder="Enter display name"
+                placeholder="Enter name"
               />
             </div>
-            {errors.displayName && (
+            {errors.name && (
               <p className="text-red-500 text-sm font-medium mt-1">
-                {errors.displayName.message}
+                {errors.name.message}
               </p>
             )}
           </div>
@@ -192,7 +217,7 @@ export default function ProfileTab() {
               />
               <input
                 type="email"
-                defaultValue="admin@qqai.com"
+                value={profile?.email || ""}
                 disabled
                 className="w-full pl-11 pr-4 py-3 bg-[#F8FAFC] border border-gray-100 rounded-xl text-base font-medium text-foreground focus:bg-white focus:outline-none focus:border-primary transition-all cursor-not-allowed disabled:opacity-50"
                 placeholder="Enter email address"

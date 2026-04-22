@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Shield, Lock, Eye, EyeOff } from "lucide-react";
@@ -6,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useResetAdminPasswordMutation } from "@/redux/services/settingsApi";
 
 const securitySchema = z
   .object({
@@ -21,6 +23,7 @@ const securitySchema = z
 type SecurityFormValues = z.infer<typeof securitySchema>;
 
 export default function SecurityTab() {
+  const [resetPassword] = useResetAdminPasswordMutation();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -35,11 +38,17 @@ export default function SecurityTab() {
   });
 
   const onSubmit = async (data: SecurityFormValues) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log(data);
-    toast.success("Password updated successfully!");
-    reset();
+    try {
+      await resetPassword({
+        old_password: data.currentPassword,
+        new_password: data.newPassword,
+      }).unwrap();
+      
+      toast.success("Password updated successfully!");
+      reset();
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update password");
+    }
   };
 
   return (

@@ -1,54 +1,75 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiSlice } from "../features/apiSlice";
-
-export interface SystemSettings {
-  autoApproveMode: boolean;
-  emailNotifications: boolean;
-  twoFactorAuth: boolean;
-  maintenanceMode: boolean;
-  privacyPolicy: string;
-  termsOfService: string;
-  lastUpdatedBy?: string | { _id: string; name: string };
-  updatedAt?: string;
-}
-
-export interface LegalResponse {
-  success: boolean;
-  data: {
-    privacyPolicy: string;
-    termsOfService: string;
-    updatedAt: string;
-  };
-}
+import {
+  AdminProfile,
+  AdminProfileApiResponse,
+  TermsSummaryApiResponse,
+  TermsSection,
+} from "../../types/settings";
 
 export const settingsApi = apiSlice.injectEndpoints({
+  overrideExisting: process.env.NODE_ENV === "development",
   endpoints: (builder) => ({
-    getSettings: builder.query<{ success: boolean; data: SystemSettings }, void>({
-      query: () => ({
-        url: "/settings",
-        method: "GET",
-      }),
-      providesTags: ["Settings"],
+    // Admin Profile
+    getAdminProfile: builder.query<AdminProfile, void>({
+      query: () => "/adminapp/me/",
+      transformResponse: (response: AdminProfileApiResponse) => response.data,
+      providesTags: ["AdminProfile"],
     }),
-    updateSettings: builder.mutation<{ success: boolean; data: SystemSettings }, Partial<SystemSettings>>({
+    updateAdminProfile: builder.mutation<AdminProfile, FormData>({
+      query: (formData) => ({
+        url: "/adminapp/me/",
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["AdminProfile"],
+    }),
+    resetAdminPassword: builder.mutation<any, any>({
       query: (data) => ({
-        url: "/settings",
-        method: "PUT",
+        url: "/adminapp/me/reset-password/",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Settings"],
     }),
-    getLegalDocs: builder.query<LegalResponse, void>({
-      query: () => ({
-        url: "/settings/legal",
-        method: "GET",
+
+    // Terms and Conditions
+    getTermsAndConditions: builder.query<TermsSummaryApiResponse["data"], void>({
+      query: () => "/adminapp/terms/",
+      transformResponse: (response: TermsSummaryApiResponse) => response.data,
+      providesTags: ["Terms"],
+    }),
+    createTermsSections: builder.mutation<TermsSection[], { sections: any[] }>({
+      query: (data) => ({
+        url: "/adminapp/terms/sections/",
+        method: "POST",
+        body: data,
       }),
-      providesTags: ["Settings"],
+      invalidatesTags: ["Terms"],
+    }),
+    updateTermsSection: builder.mutation<TermsSection, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/adminapp/terms/sections/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Terms"],
+    }),
+    deleteTermsSection: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/adminapp/terms/sections/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Terms"],
     }),
   }),
 });
 
-export const { 
-  useGetSettingsQuery, 
-  useUpdateSettingsMutation,
-  useGetLegalDocsQuery 
+export const {
+  useGetAdminProfileQuery,
+  useUpdateAdminProfileMutation,
+  useResetAdminPasswordMutation,
+  useGetTermsAndConditionsQuery,
+  useCreateTermsSectionsMutation,
+  useUpdateTermsSectionMutation,
+  useDeleteTermsSectionMutation,
 } = settingsApi;

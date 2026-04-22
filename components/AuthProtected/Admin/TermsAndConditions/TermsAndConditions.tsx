@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   FileText,
   Calendar,
@@ -13,16 +14,48 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
-import { termsOfService } from "@/data/legalData";
 import { toast } from "sonner";
 import { DeleteConfirmationModal } from "@/components/Shared/DeleteConfirmationModal";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  useGetTermsAndConditionsQuery,
+  useCreateTermsSectionsMutation,
+  useUpdateTermsSectionMutation,
+  useDeleteTermsSectionMutation,
+} from "@/redux/services/settingsApi";
+
+interface LocalSection {
+  id: string;
+  title: string;
+  content: string;
+  order: number;
+  isNew?: boolean;
+}
 
 export default function TermsAndConditionsClient() {
-  const [sections, setSections] = useState(termsOfService);
+  const { data: termsData, isLoading } = useGetTermsAndConditionsQuery();
+  const [createSections] = useCreateTermsSectionsMutation();
+  const [updateSection] = useUpdateTermsSectionMutation();
+  const [deleteSection] = useDeleteTermsSectionMutation();
+
+  const [sections, setSections] = useState<LocalSection[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<string | null>(null);
+
+  // Sync state with API data
+  React.useEffect(() => {
+    if (termsData?.terms_and_conditions) {
+      setSections(
+        termsData.terms_and_conditions.map((s) => ({
+          id: s.id,
+          title: s.section_name,
+          content: s.description,
+          order: s.order,
+        })),
+      );
+    }
+  }, [termsData]);
 
   const calculateTotalWords = () => {
     return sections.reduce((acc, curr) => {
@@ -34,7 +67,7 @@ export default function TermsAndConditionsClient() {
   };
 
   const totalWords = calculateTotalWords();
-  const readTime = Math.max(1, Math.ceil(totalWords / 200)); // approx 200 words per minute
+  const readTime = Math.max(1, Math.ceil(totalWords / 200));
 
   const handleTitleChange = (id: string, newTitle: string) => {
     setSections(
@@ -69,26 +102,86 @@ export default function TermsAndConditionsClient() {
     setSections([
       ...sections,
       {
-        id: `section-${Date.now()}`,
+        id: `temp-${Date.now()}`,
         title: "",
         content: "",
+        order: sections.length + 1,
+        isNew: true,
       },
     ]);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (sectionToDelete) {
-      setSections(sections.filter((s) => s.id !== sectionToDelete));
-      toast.success("Section deleted successfully");
+      const section = sections.find((s) => s.id === sectionToDelete);
+      if (section && !section.isNew) {
+        try {
+          await deleteSection(sectionToDelete).unwrap();
+          toast.success("Section deleted successfully");
+        } catch (error: any) {
+          toast.error(error?.data?.message || "Failed to delete section");
+          return;
+        }
+      } else {
+        setSections(sections.filter((s) => s.id !== sectionToDelete));
+        toast.success("New section removed");
+      }
     }
     setIsDeleteModalOpen(false);
     setSectionToDelete(null);
   };
 
-  const handleSave = () => {
-    // Local simulation of saving
-    toast.success("Terms & Conditions saved successfully!");
+  const handleSave = async () => {
+    try {
+      const newSections = sections.filter((s) => s.isNew);
+      const existingSections = sections.filter((s) => !s.isNew);
+
+      // Handle new sections (Bulk)
+      if (newSections.length > 0) {
+        await createSections({
+          sections: newSections.map((s, idx) => ({
+            section_name: s.title,
+            description: s.content,
+            order: existingSections.length + idx + 1,
+          })),
+        }).unwrap();
+      }
+
+      // Handle existing sections (Individual PATCH for now, as per API spec)
+      for (const section of existingSections) {
+        await updateSection({
+          id: section.id,
+          data: {
+            section_name: section.title,
+            description: section.content,
+            order: section.order,
+          },
+        }).unwrap();
+      }
+
+      toast.success("Terms & Conditions updated successfully!");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to save changes");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-5xl mx-auto w-full p-6 md:p-8">
+        <div className="h-40 bg-slate-50 animate-pulse rounded-2xl" />
+        <div className="grid grid-cols-3 gap-4">
+          <div className="h-24 bg-slate-50 animate-pulse rounded-xl" />
+          <div className="h-24 bg-slate-50 animate-pulse rounded-xl" />
+          <div className="h-24 bg-slate-50 animate-pulse rounded-xl" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-60 bg-slate-50 animate-pulse rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto w-full">

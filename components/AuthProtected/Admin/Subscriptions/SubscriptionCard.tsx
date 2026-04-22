@@ -20,7 +20,7 @@ export function SubscriptionCard({
   planType,
   subscribersCount,
   features,
-  onEditFeatures,
+  // onEditFeatures,
   price,
   className,
 }: SubscriptionCardProps) {
@@ -111,7 +111,7 @@ export function SubscriptionCard({
       </div>
 
       {/* Action Button Footer */}
-      <div className="mt-auto p-6 pt-0">
+      {/* <div className="mt-auto p-6 pt-0">
         <button
           onClick={() => onEditFeatures(planType)}
           className={cn(
@@ -123,7 +123,7 @@ export function SubscriptionCard({
         >
           <Edit3 size={16} /> Edit Features
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

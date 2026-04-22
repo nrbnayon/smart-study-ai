@@ -8,7 +8,6 @@ import {
   Mail,
   Camera,
   Lock,
-  Phone,
   Crown,
   CheckCircle2,
 } from "lucide-react";
@@ -24,6 +23,7 @@ interface AddEditUserModalProps {
   title: string;
   user?: any;
   isLoading?: boolean;
+  isSubscriptionOnly?: boolean;
 }
 
 export default function AddEditUserModal({
@@ -33,11 +33,11 @@ export default function AddEditUserModal({
   title,
   user,
   isLoading,
+  isSubscriptionOnly = false,
 }: AddEditUserModalProps) {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone_number: user?.phone_number || "",
     password: "",
     current_plan: user?.subscription_status || "monthly",
     verified: user?.account_status === "verified",
@@ -55,7 +55,6 @@ export default function AddEditUserModal({
       setFormData({
         name: user?.name || "",
         email: user?.email || "",
-        phone_number: user?.phone_number || "",
         password: "",
         current_plan: user?.subscription_status || "monthly",
         verified: user ? user.account_status === "verified" : true,
@@ -81,8 +80,6 @@ export default function AddEditUserModal({
     const data = new FormData();
     data.append("name", formData.name);
     data.append("email", formData.email);
-    if (formData.phone_number)
-      data.append("phone_number", formData.phone_number);
     if (formData.password) data.append("password", formData.password);
     data.append("current_plan", formData.current_plan);
     data.append("verified", String(formData.verified));
@@ -161,9 +158,9 @@ export default function AddEditUserModal({
                 <div
                   className={cn(
                     "relative group cursor-pointer",
-                    isLoading && "opacity-50 pointer-events-none",
+                    (isLoading || isSubscriptionOnly) && "opacity-50 pointer-events-none",
                   )}
-                  onClick={() => !isLoading && fileInputRef.current?.click()}
+                  onClick={() => !(isLoading || isSubscriptionOnly) && fileInputRef.current?.click()}
                 >
                   <div className="w-24 h-24 rounded-[32px] overflow-hidden border-4 border-white shadow-xl bg-slate-50 flex items-center justify-center relative transition-all duration-500 group-hover:rounded-[24px] group-hover:scale-105 border-slate-100/50">
                     {formData.imagePreview ? (
@@ -215,7 +212,7 @@ export default function AddEditUserModal({
                       type="text"
                       name="name"
                       required
-                      disabled={isLoading}
+                      disabled={isLoading || isSubscriptionOnly}
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Alice Johnson"
@@ -238,7 +235,7 @@ export default function AddEditUserModal({
                       type="email"
                       name="email"
                       required
-                      disabled={isLoading}
+                      disabled={isLoading || !!user}
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="alice@example.com"
@@ -247,30 +244,6 @@ export default function AddEditUserModal({
                   </div>
                 </div>
 
-                {/* Phone Number */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5 ml-0.5">
-                    Phone Number{" "}
-                    <span className="text-slate-400 text-[10px] font-normal uppercase tracking-wider">
-                      (optional)
-                    </span>
-                  </label>
-                  <div className="relative group">
-                    <Phone
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"
-                      size={18}
-                    />
-                    <input
-                      type="tel"
-                      name="phone_number"
-                      disabled={isLoading}
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                      placeholder="+1 (555) 000-0000"
-                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-[18px] text-sm focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all outline-none font-semibold placeholder:text-slate-300 text-slate-900 disabled:opacity-60"
-                    />
-                  </div>
-                </div>
 
                 {/* Password */}
                 <div className="space-y-2">
@@ -295,7 +268,7 @@ export default function AddEditUserModal({
                       type="password"
                       name="password"
                       required={!user}
-                      disabled={isLoading}
+                      disabled={isLoading || !!user}
                       value={formData.password}
                       onChange={handleChange}
                       placeholder={user ? "••••••••" : "Create password"}
@@ -405,7 +378,7 @@ export default function AddEditUserModal({
 
                 <button
                   type="button"
-                  disabled={isLoading}
+                  disabled={isLoading || isSubscriptionOnly}
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,

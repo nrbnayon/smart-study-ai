@@ -298,6 +298,7 @@ export default function SubscriptionsClient() {
         isLoading={isUpdating}
         title="Change Plan"
         user={selectedUser}
+        isSubscriptionOnly={true}
       />
     </div>
   );

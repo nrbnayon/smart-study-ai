@@ -89,6 +89,24 @@ export const userApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
+
+    updateUserSubscription: builder.mutation<
+      User,
+      { id: string; data: { current_plan: string } }
+    >({
+      query: ({ id, data }) => ({
+        url: `/adminapp/users/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      transformResponse: (response: UserApiResponse) => {
+        return response?.data?.data as any;
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "User", id },
+        { type: "User", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -98,4 +116,5 @@ export const {
   useUpdateUserByIdMutation,
   useDeleteUserMutation,
   useCreateUserMutation,
+  useUpdateUserSubscriptionMutation,
 } = userApi;

@@ -11,7 +11,10 @@ import { DynamicTable } from "@/components/Shared/DynamicTable";
 import { TableColumn } from "@/types/table.types";
 import { SubscriptionCard } from "./SubscriptionCard";
 import { toast } from "sonner";
-import { useGetAllUsersQuery } from "@/redux/services/userApi";
+import { 
+  useGetAllUsersQuery, 
+  useUpdateUserSubscriptionMutation 
+} from "@/redux/services/userApi";
 import { resolveMediaUrl } from "@/lib/utils";
 import { User } from "@/types/users";
 import { TableSkeleton } from "@/components/Skeleton/TableSkeleton";
@@ -48,6 +51,7 @@ export default function SubscriptionsClient() {
     search,
     page: currentPage,
   });
+  const [updateSubscription, { isLoading: isUpdating }] = useUpdateUserSubscriptionMutation();
 
   const allUsers = userResponse?.results || [];
   const totalCount = userResponse?.count || 0;
@@ -277,9 +281,21 @@ export default function SubscriptionsClient() {
       <AddEditUserModal
         isOpen={isEditUserModalOpen}
         onClose={() => setIsEditUserModalOpen(false)}
-        onConfirm={(data) => {
-          console.log("Updated plan for user:", data);
+        onConfirm={async (data) => {
+          if (!selectedUser) return;
+          try {
+            const current_plan = data.get("current_plan") as string;
+            await updateSubscription({
+              id: selectedUser.id,
+              data: { current_plan },
+            }).unwrap();
+            toast.success("Subscription updated successfully");
+            setIsEditUserModalOpen(false);
+          } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to update subscription");
+          }
         }}
+        isLoading={isUpdating}
         title="Change Plan"
         user={selectedUser}
       />

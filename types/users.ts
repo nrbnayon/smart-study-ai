@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  phone_number?: string;
   image?: string | null;
   signup_date: string;
   account_status: "verified" | "not_verified";

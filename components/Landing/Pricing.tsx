@@ -120,7 +120,7 @@ const Pricing = () => {
               </div>
 
               <Button
-                className={`w-full py-6 rounded-2xl font-bold text-lg transition-all ${
+                className={`w-full py-6 rounded-2xl font-bold text-lg transition-all hover:text-white ${
                   plan.popular
                     ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200"
                     : "bg-white border-2 border-gray-100 hover:border-indigo-600 hover:text-indigo-600 text-gray-900"

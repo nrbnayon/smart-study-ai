@@ -15,7 +15,7 @@ const LandingPage = () => {
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   return (
@@ -83,10 +83,10 @@ const LandingPage = () => {
                   their subjects. Start your journey today for free.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-5 rounded-full font-bold text-xl transition-all shadow-xl shadow-indigo-500/20 w-full sm:w-auto">
+                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-5 rounded-full font-bold text-xl transition-all shadow-xl shadow-indigo-500/20 w-full sm:w-auto cursor-pointer">
                     Get Started Free
                   </button>
-                  <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-10 py-5 rounded-full font-bold text-xl transition-all w-full sm:w-auto">
+                  <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-10 py-5 rounded-full font-bold text-xl transition-all w-full sm:w-auto cursor-pointer">
                     Talk to Sales
                   </button>
                 </div>

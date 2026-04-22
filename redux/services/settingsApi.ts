@@ -32,7 +32,7 @@ export const settingsApi = apiSlice.injectEndpoints({
       }),
     }),
 
-    // Terms and Conditions
+    // Terms and Conditions (New API)
     getTermsAndConditions: builder.query<TermsSummaryApiResponse["data"], void>({
       query: () => "/adminapp/terms/",
       transformResponse: (response: TermsSummaryApiResponse) => response.data,
@@ -61,6 +61,60 @@ export const settingsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Terms"],
     }),
+
+    // Legacy/Compatibility Hooks for Build Fix
+    getLegalDocs: builder.query<any, void>({
+      query: () => "/adminapp/terms/",
+      transformResponse: (response: any) => ({
+        success: true,
+        data: {
+          termsOfService: JSON.stringify(
+            response.data.terms_and_conditions.map((s: any) => ({
+              id: s.id,
+              title: s.section_name,
+              content: s.description,
+            }))
+          ),
+          privacyPolicy: JSON.stringify(
+            response.data.terms_and_conditions.map((s: any) => ({
+              id: s.id,
+              title: s.section_name,
+              content: s.description,
+            }))
+          ),
+          updatedAt: response.timestamp,
+        },
+      }),
+    }),
+    getSettings: builder.query<any, void>({
+      query: () => "/adminapp/terms/",
+      transformResponse: (response: any) => ({
+        success: true,
+        data: {
+          termsOfService: JSON.stringify(
+            response.data.terms_and_conditions.map((s: any) => ({
+              id: s.id,
+              title: s.section_name,
+              content: s.description,
+            }))
+          ),
+          privacyPolicy: JSON.stringify(
+            response.data.terms_and_conditions.map((s: any) => ({
+              id: s.id,
+              title: s.section_name,
+              content: s.description,
+            }))
+          ),
+        },
+      }),
+    }),
+    updateSettings: builder.mutation<any, any>({
+      query: (data) => ({
+        url: "/adminapp/terms/sections/",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -72,4 +126,9 @@ export const {
   useCreateTermsSectionsMutation,
   useUpdateTermsSectionMutation,
   useDeleteTermsSectionMutation,
+
+  // Legacy exports
+  useGetLegalDocsQuery,
+  useGetSettingsQuery,
+  useUpdateSettingsMutation,
 } = settingsApi;

@@ -113,8 +113,13 @@ export default function AnalyticsClient() {
               </div>
             </div>
 
-            <div className="h-[300px] w-full mt-auto min-h-[300px]">
-              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+            <div className="h-[300px] w-full mt-auto min-h-[300px] min-w-0">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+                minWidth={0}
+                minHeight={300}
+              >
                 <LineChart
                   data={chartData}
                   margin={{ top: 5, right: 30, left: -20, bottom: 5 }}

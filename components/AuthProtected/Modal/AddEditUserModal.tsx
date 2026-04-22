@@ -171,6 +171,7 @@ export default function AddEditUserModal({
                         src={formData.imagePreview}
                         alt="Preview"
                         fill
+                        sizes="(max-width: 96px) 100vw, 96px"
                         className="object-cover"
                       />
                     ) : (

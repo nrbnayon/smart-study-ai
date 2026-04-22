@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
 import { StatsCard } from "@/components/Shared/StatsCard";
 import { Users } from "lucide-react";
@@ -32,7 +32,30 @@ export default function AnalyticsClient() {
     ...userActivityData,
   ];
 
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const chartData = timeRange === "7d" ? userActivityData : extendedData;
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex flex-col pb-10">
+        <DashboardHeader title="Analytics" />
+        <div className="p-4 md:p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="h-32 bg-slate-50 animate-pulse rounded-2xl" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-[400px] bg-slate-50 animate-pulse rounded-2xl" />
+            <div className="h-[400px] bg-slate-50 animate-pulse rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col pb-10 animate-fade-in">
@@ -90,8 +113,8 @@ export default function AnalyticsClient() {
               </div>
             </div>
 
-            <div className="h-[300px] w-full mt-auto">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] w-full mt-auto min-h-[300px]">
+              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                 <LineChart
                   data={chartData}
                   margin={{ top: 5, right: 30, left: -20, bottom: 5 }}
@@ -152,17 +175,17 @@ export default function AnalyticsClient() {
               {popularSubjectsData.map((subject, index) => {
                 // Interpolate from #6366F1 (99, 102, 241) to #C7D2FE (199, 210, 254)
                 const total = popularSubjectsData.length;
-                const ratio = index / (Math.max(1, total - 1));
+                const ratio = index / Math.max(1, total - 1);
                 const r = Math.round(99 + ratio * (199 - 99));
                 const g = Math.round(102 + ratio * (210 - 102));
                 const b = Math.round(241 + ratio * (254 - 241));
-                
+
                 return (
                   <div key={subject.rank} className="flex items-center gap-4">
                     <span className="text-secondary font-semibold text-sm w-4 shrink-0">
                       {subject.rank}
                     </span>
-                    
+
                     <div className="flex-1 flex flex-col gap-2">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-foreground text-sm">
@@ -172,7 +195,7 @@ export default function AnalyticsClient() {
                           {subject.views.toLocaleString()}
                         </span>
                       </div>
-                      
+
                       {/* Progress Bar Container */}
                       <div className="w-full h-2.5 bg-[#F8FAFC] rounded-full overflow-hidden">
                         <div

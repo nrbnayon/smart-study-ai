@@ -81,6 +81,7 @@ export default function ProfileTab() {
                   src={logoPreview}
                   alt="Platform Logo"
                   fill
+                  sizes="(max-width: 112px) 100vw, 112px"
                   className="object-cover"
                 />
               ) : (

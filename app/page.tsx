@@ -26,7 +26,7 @@ export const metadata: Metadata = {
       "Boost your grades and master complex subjects with our advanced AI-powered study platform.",
     images: [
       {
-        url: "/smart_study_hero_image_1776831772283.png",
+        url: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200",
         width: 1200,
         height: 630,
         alt: "SmartStudy AI Landing Page",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SmartStudy AI | Master Your Subjects Faster",
     description: "AI-powered tools designed to help you catch up and excel in your studies.",
-    images: ["/smart_study_hero_image_1776831772283.png"],
+    images: ["https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200"],
   },
 };
 

@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Brain, Twitter, Github, Linkedin, Instagram } from "lucide-react";
+import { Twitter, Github, Linkedin, Instagram } from "lucide-react";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -11,13 +12,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Info */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
-                <Brain size={24} />
-              </div>
-              <span className="text-xl font-bold font-clash tracking-tight text-white">
-                SmartStudy <span className="text-indigo-400">AI</span>
-              </span>
+            <Link href="/" className="flex items-center group">
+              <Image
+                src="/icons/logo.png"
+                alt="SmartStudy AI"
+                width={120}
+                height={32}
+                className="h-8 w-auto group-hover:scale-105 transition-transform opacity-80 hover:opacity-100"
+              />
             </Link>
             <p className="text-sm leading-relaxed">
               Empowering students worldwide with cutting-edge AI technology to make learning efficient, interactive, and fun.

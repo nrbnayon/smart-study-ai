@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Brain } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -33,13 +34,15 @@ const Navbar = () => {
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
-            <Brain size={24} />
-          </div>
-          <span className="text-xl font-bold font-clash tracking-tight text-gray-900">
-            SmartStudy <span className="text-indigo-600">AI</span>
-          </span>
+        <Link href="/" className="flex items-center group">
+          <Image
+            src="/icons/logo.png"
+            alt="SmartStudy AI"
+            width={150}
+            height={40}
+            className="h-10 w-auto group-hover:scale-105 transition-transform"
+            priority
+          />
         </Link>
 
         {/* Desktop Links */}

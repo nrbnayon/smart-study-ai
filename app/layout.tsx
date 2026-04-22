@@ -109,7 +109,7 @@ export const metadata: Metadata = {
       "Transform your notes into quizzes instantly. The most advanced AI learning platform for students and professionals.",
     images: [
       {
-        url: `https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200`,
+        url: `https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80&w=1200`,
         width: 1200,
         height: 630,
         alt: "SmartStudy AI - AI Quiz Platform",
@@ -121,7 +121,7 @@ export const metadata: Metadata = {
     title: "SmartStudy AI | Master Your Studies with AI",
     description:
       "The most comprehensive AI learning platform for quiz generation and progress tracking.",
-    images: [`https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200`],
+    images: [`https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80&w=1200`],
   },
   alternates: {
     canonical: "/",

@@ -106,8 +106,8 @@ const Hero = () => {
               <div className="absolute inset-0 bg-indigo-600 rounded-3xl blur-2xl opacity-20 -rotate-6 scale-95" />
               <div className="relative bg-white p-4 rounded-3xl shadow-2xl border border-white/50 backdrop-blur-sm">
                 <Image
-                  src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200"
-                  alt="Smart Study AI Dashboard"
+                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80&w=1200"
+                  alt="Smart Study AI Dashboard Mockup"
                   width={800}
                   height={600}
                   className="rounded-2xl"

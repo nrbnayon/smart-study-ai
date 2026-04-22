@@ -1,19 +1,19 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import LandingPage from "@/components/Landing/LandingPage";
 
 export const metadata: Metadata = {
-  title: "Bass Fishing Intelligence Hub | Expert Reports & Lake Insights",
+  title: "SmartStudy AI | Master Any Subject with AI-Powered Quizzes",
   description:
-    "Plan your next trophy bass fishing trip with real-time lake intelligence, detailed seasonal reports, and a community of expert anglers at BASSPORT Pro.",
+    "Transform your study materials into interactive quizzes, track your progress with smart analytics, and learn 2x faster with SmartStudy AI.",
   keywords: [
-    "bass fishing intelligence",
-    "best bass lakes in America",
-    "real-time fishing reports",
-    "bass tournament patterns",
-    "trophy bass photos",
-    "angler insights",
-    "lake conditions tracker",
+    "AI quiz generator",
+    "smart study tools",
+    "AI learning platform",
+    "exam preparation AI",
+    "adaptive learning",
+    "interactive quizzes",
   ],
   alternates: {
     canonical: "/",
@@ -21,23 +21,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/",
-    title: "BASSPORT Pro | Your Ultimate Bass Fishing Intelligence Hub",
+    title: "SmartStudy AI | The Future of Learning",
     description:
-      "Access premium lake data, track fishing conditions, and learn from real-world angler reports to catch more bass.",
+      "Boost your grades and master complex subjects with our advanced AI-powered study platform.",
     images: [
       {
-        url: "/icons/logo.png",
+        url: "/smart_study_hero_image_1776831772283.png",
         width: 1200,
         height: 630,
-        alt: "BASSPORT Pro Landing Page",
+        alt: "SmartStudy AI Landing Page",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BASSPORT Pro | Master Your Bass Fishing Game",
-    description: "Intelligence and reports designed to help you catch your next personal best bass.",
-    images: ["/icons/logo.png"],
+    title: "SmartStudy AI | Master Your Subjects Faster",
+    description: "AI-powered tools designed to help you catch up and excel in your studies.",
+    images: ["/smart_study_hero_image_1776831772283.png"],
   },
 };
 
@@ -49,14 +49,11 @@ export default async function HomePage() {
 
   // If user is authenticated, redirect to their dashboard
   if (accessToken && userRole) {
-    switch (userRole) {
-      case "admin":
-        redirect("/dashboard");
-      default:
-        redirect("/signin");
+    if (userRole === "admin") {
+      redirect("/dashboard");
     }
   }
 
-  // If not authenticated, redirect to public landing page
-  redirect("/signin");
+  // If not authenticated, render the public landing page
+  return <LandingPage />;
 }

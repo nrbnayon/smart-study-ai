@@ -7,7 +7,6 @@ import {
   User,
   Mail,
   Camera,
-  ToggleLeft,
   Lock,
   Phone,
   Crown,
@@ -314,13 +313,13 @@ export default function AddEditUserModal({
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     {
-                      id: "free",
+                      id: "monthly",
                       label: "Basic",
                       desc: "Limited access",
                       icon: CheckCircle2,
                     },
                     {
-                      id: "monthly",
+                      id: "yearly",
                       label: "Premium",
                       desc: "Full access",
                       icon: Crown,
@@ -396,8 +395,8 @@ export default function AddEditUserModal({
                       {formData.verified ? "Account Verified" : "Not Verified"}
                     </h4>
                     <p className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">
-                      {formData.verified 
-                        ? "User account is verified and active" 
+                      {formData.verified
+                        ? "User account is verified and active"
                         : "User account is pending verification"}
                     </p>
                   </div>

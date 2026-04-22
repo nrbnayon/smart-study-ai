@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "6zpmb4x8-8025.inc1.devtunnels.ms",
       },
+      {
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+      },
     ],
   },
   allowedDevOrigins: ["10.10.12.11"],

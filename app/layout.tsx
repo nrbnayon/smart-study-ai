@@ -61,30 +61,28 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   title: {
-    default: "BASSPORT Pro | #1 Bass Fishing Intelligence & Lake Reports",
-    template: "%s | BASSPORT Pro",
+    default: "SmartStudy AI | #1 AI Quiz Generator & Learning Platform",
+    template: "%s | SmartStudy AI",
   },
   description:
-    "Join the ultimate bass fishing community. Access real-time lake intelligence, expert fishing reports, seasonal patterns, and share your trophy catches on BASSPORT Pro.",
+    "Master any subject with AI-powered quizzes. Upload PDFs, generate questions, and track your progress with SmartStudy AI.",
   keywords: [
-    "bass fishing",
-    "bass fishing reports",
-    "best bass lakes",
-    "fishing intelligence",
-    "trophy bass catches",
-    "bass fishing community",
-    "lake conditions",
-    "fishing techniques",
-    "BASSPORT Pro",
-    "angler reports",
+    "AI quiz generator",
+    "smart study",
+    "exam prep",
+    "AI learning",
+    "quiz maker",
+    "study assistant",
+    "adaptive learning",
+    "SmartStudy AI",
   ],
   icons: {
-    icon: `${process.env.NEXT_PUBLIC_APP_URL}/icons/logo.png`,
-    apple: `${process.env.NEXT_PUBLIC_APP_URL}/icons/logo.png`,
+    icon: `/icons/logo.png`,
+    apple: `/icons/logo.png`,
   },
-  authors: [{ name: "BASSPORT Pro Team" }],
-  creator: "BASSPORT Pro",
-  publisher: "BASSPORT Pro",
+  authors: [{ name: "SmartStudy AI Team" }],
+  creator: "SmartStudy AI",
+  publisher: "SmartStudy AI",
   formatDetection: {
     email: false,
     address: false,
@@ -105,38 +103,38 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "BASSPORT Pro",
-    title: "BASSPORT Pro | #1 Bass Fishing Intelligence & Lake Reports",
+    siteName: "SmartStudy AI",
+    title: "SmartStudy AI | AI-Powered Learning for Everyone",
     description:
-      "Master bass fishing with premium lake intelligence, catch reports, and angler insights. Your destination for trophy bass fishing.",
+      "Transform your notes into quizzes instantly. The most advanced AI learning platform for students and professionals.",
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/icons/logo.png`,
+        url: `/smart_study_hero_image_1776831772283.png`,
         width: 1200,
         height: 630,
-        alt: "BASSPORT Pro - Bass Fishing Intelligence Hub",
+        alt: "SmartStudy AI - AI Quiz Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BASSPORT Pro | Bass Fishing Intelligence & Lake Reports",
+    title: "SmartStudy AI | Master Your Studies with AI",
     description:
-      "The most comprehensive bass fishing platform for intelligence, reports, and trophy catches.",
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/icons/logo.png`],
+      "The most comprehensive AI learning platform for quiz generation and progress tracking.",
+    images: [`/smart_study_hero_image_1776831772283.png`],
   },
   alternates: {
     canonical: "/",
   },
-  category: "Fishing & Outdoors",
-  classification: "Sports Intelligence Platform",
+  category: "Education & Technology",
+  classification: "AI Learning Platform",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#1A365D",
+  themeColor: "#4f46e5",
 };
 
 export default function RootLayout({
@@ -147,10 +145,10 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: process.env.NEXT_PUBLIC_APP_NAME || "BASSPORT Pro",
+    name: process.env.NEXT_PUBLIC_APP_NAME || "SmartStudy AI",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     description:
-      "Discover top bass fishing lakes, real-time reports, and trophy catches with BASSPORT Pro.",
+      "Master any subject with AI-powered quizzes. The most advanced study platform.",
     potentialAction: {
       "@type": "SearchAction",
       target: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/?q={search_term_string}`,

@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+// import { cookies } from "next/headers";
+// import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import LandingPage from "@/components/Landing/LandingPage";
 
@@ -43,16 +43,16 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   // Get user role from cookies
-  const cookieStore = await cookies();
-  const userRole = cookieStore.get("userRole")?.value;
-  const accessToken = cookieStore.get("accessToken")?.value;
+  // const cookieStore = await cookies();
+  // const userRole = cookieStore.get("userRole")?.value;
+  // const accessToken = cookieStore.get("accessToken")?.value;
 
-  // If user is authenticated, redirect to their dashboard
-  if (accessToken && userRole) {
-    if (userRole === "admin") {
-      redirect("/dashboard");
-    }
-  }
+  // // If user is authenticated, redirect to their dashboard
+  // if (accessToken && userRole) {
+  //   if (userRole === "admin") {
+  //     redirect("/dashboard");
+  //   }
+  // }
 
   // If not authenticated, render the public landing page
   return <LandingPage />;

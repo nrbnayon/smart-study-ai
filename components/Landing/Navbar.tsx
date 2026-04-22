@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/hooks/useUser";
 
 const Navbar = () => {
+  const { isAuthenticated, role } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -57,16 +59,26 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="flex items-center gap-4">
-            <Link href="/signin">
-              <Button variant="ghost" className="font-semibold">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 shadow-lg shadow-indigo-200">
-                Get Started
-              </Button>
-            </Link>
+            {isAuthenticated && role === "admin" ? (
+              <Link href="/dashboard">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 shadow-lg shadow-indigo-200">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/signin">
+                  <Button variant="ghost" className="font-semibold">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 shadow-lg shadow-indigo-200">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -100,16 +112,26 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
-                <Link href="/signin">
-                  <Button variant="outline" className="w-full justify-center">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button className="w-full justify-center bg-indigo-600 text-white">
-                    Get Started
-                  </Button>
-                </Link>
+                {isAuthenticated && role === "admin" ? (
+                  <Link href="/dashboard">
+                    <Button className="w-full justify-center bg-indigo-600 text-white">
+                      Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/signin">
+                      <Button variant="outline" className="w-full justify-center">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/signup">
+                      <Button className="w-full justify-center bg-indigo-600 text-white">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

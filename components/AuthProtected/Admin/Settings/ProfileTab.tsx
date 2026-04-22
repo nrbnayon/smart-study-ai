@@ -12,6 +12,8 @@ import {
   useUpdateAdminProfileMutation,
 } from "@/redux/services/settingsApi";
 import { toast } from "sonner";
+import { useAppDispatch } from "@/redux/hooks";
+import { updateProfile as syncAuthProfile } from "@/redux/features/authSlice";
 
 const profileSchema = z.object({
   name: z
@@ -24,7 +26,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfileTab() {
   const { data: profile } = useGetAdminProfileQuery();
-  const [updateProfile] = useUpdateAdminProfileMutation();
+  const [triggerUpdate, { isLoading: isUpdating }] = useUpdateAdminProfileMutation();
+  const dispatch = useAppDispatch();
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,10 +74,18 @@ export default function ProfileTab() {
         formData.append("image", selectedFile);
       }
 
-      await updateProfile(formData).unwrap();
+      const response = await triggerUpdate(formData).unwrap();
+      
+      // Update global auth state to reflect changes in Sidebar/Header instantly
+      dispatch(syncAuthProfile({
+        name: response.name,
+        avatar: response.image
+      }));
+
       toast.success("Admin profile updated successfully!");
       setSelectedFile(null);
     } catch (error: any) {
+      console.error("Profile Update Error:", error);
       toast.error(error?.data?.message || "Failed to update profile");
     }
   };
@@ -228,10 +239,10 @@ export default function ProfileTab() {
           <div className="pt-4 flex justify-end">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUpdating}
               className="px-6 py-3 bg-primary hover:bg-primary text-white rounded-xl font-bold text-base transition-colors flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-70"
             >
-              {isSubmitting ? (
+              {isSubmitting || isUpdating ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <User size={18} />

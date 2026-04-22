@@ -42,7 +42,8 @@ const Navbar = () => {
             alt="SmartStudy AI"
             width={150}
             height={40}
-            className="h-10 w-auto group-hover:scale-105 transition-transform"
+            style={{ width: "auto", height: "40px" }}
+            className="group-hover:scale-105 transition-transform"
             priority
           />
         </Link>

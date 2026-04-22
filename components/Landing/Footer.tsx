@@ -7,77 +7,120 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#0f172a] text-gray-400 py-20">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+    <footer className="relative bg-[#0F172A] text-slate-400 py-24 overflow-hidden">
+      {/* Background Decorative Element */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+      
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-24 mb-20">
           {/* Brand Info */}
-          <div className="space-y-6">
-            <Link href="/" className="flex items-center group">
+          <div className="lg:col-span-2 space-y-8">
+            <Link href="/" className="inline-block group transition-all duration-300">
               <Image
                 src="/icons/logo.png"
                 alt="SmartStudy AI"
-                width={120}
-                height={32}
-                className="h-8 w-auto group-hover:scale-105 transition-transform opacity-80 hover:opacity-100"
+                width={160}
+                height={40}
+                style={{ width: "auto", height: "40px" }}
+                className="opacity-90 group-hover:opacity-100 transition-opacity"
               />
             </Link>
-            <p className="text-sm leading-relaxed">
-              Empowering students worldwide with cutting-edge AI technology to make learning efficient, interactive, and fun.
+            <p className="text-base leading-relaxed max-w-sm text-slate-400/80">
+              Empowering students worldwide with cutting-edge AI technology to
+              make learning efficient, interactive, and personalized for every individual.
             </p>
-            <div className="flex items-center gap-4">
-              <Link href="#" className="hover:text-white transition-colors"><Twitter size={20} /></Link>
-              <Link href="#" className="hover:text-white transition-colors"><Github size={20} /></Link>
-              <Link href="#" className="hover:text-white transition-colors"><Linkedin size={20} /></Link>
-              <Link href="#" className="hover:text-white transition-colors"><Instagram size={20} /></Link>
+            <div className="flex items-center gap-5">
+              {[
+                { Icon: Twitter, href: "#" },
+                { Icon: Github, href: "#" },
+                { Icon: Linkedin, href: "#" },
+                { Icon: Instagram, href: "#" },
+              ].map(({ Icon, href }, index) => (
+                <Link
+                  key={index}
+                  href={href}
+                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-indigo-600 hover:border-indigo-600 hover:text-white transition-all duration-300 group"
+                >
+                  <Icon size={18} className="group-hover:scale-110 transition-transform" />
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* Links */}
+          {/* Product Links */}
           <div>
-            <h4 className="text-white font-bold mb-6">Product</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
-              <li><Link href="#how-it-works" className="hover:text-white transition-colors">How it Works</Link></li>
-              <li><Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">AI Engine</Link></li>
+            <h4 className="text-white font-bold text-lg mb-8 relative inline-block">
+              Product
+              <span className="absolute -bottom-2 left-0 w-8 h-1 bg-indigo-500 rounded-full" />
+            </h4>
+            <ul className="space-y-4">
+              {[
+                { label: "Features", href: "#features" },
+                { label: "How it Works", href: "#how-it-works" },
+                { label: "Pricing", href: "#pricing" },
+                { label: "AI Engine", href: "#" },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all duration-200"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Company Links */}
           <div>
-            <h4 className="text-white font-bold mb-6">Company</h4>
-            <ul className="space-y-4 text-sm">
-              <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
+            <h4 className="text-white font-bold text-lg mb-8 relative inline-block">
+              Company
+              <span className="absolute -bottom-2 left-0 w-8 h-1 bg-indigo-500 rounded-full" />
+            </h4>
+            <ul className="space-y-4">
+              {[
+                { label: "About Us", href: "#" },
+                { label: "Careers", href: "#" },
+                { label: "Privacy Policy", href: "#" },
+                { label: "Terms of Service", href: "#" },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all duration-200"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-6">Newsletter</h4>
-            <p className="text-sm mb-6">Stay updated with the latest AI learning trends.</p>
-            <div className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="Your email" 
-                className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 w-full"
-              />
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl transition-all">
-                Join
-              </button>
-            </div>
           </div>
         </div>
 
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 text-xs">
-          <p>© 2026 SmartStudy AI. All rights reserved.</p>
-          <div className="flex items-center gap-8">
-            <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-white transition-colors">Cookies</Link>
+        {/* Footer Bottom */}
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-sm">
+          <p className="text-slate-500 font-medium order-2 md:order-1">
+            © {new Date().getFullYear()} SmartStudy AI. All rights reserved.
+          </p>
+          
+          <div className="flex items-center gap-8 order-1 md:order-2">
+            <Link href="#" className="text-slate-500 hover:text-white transition-colors">
+              Cookies
+            </Link>
+            <Link href="#" className="text-slate-500 hover:text-white transition-colors">
+              Security
+            </Link>
+            <Link href="#" className="text-slate-500 hover:text-white transition-colors">
+              Sitemap
+            </Link>
           </div>
         </div>
       </div>
+
+      {/* Decorative Glow */}
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full -mr-64 -mb-64 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full -ml-64 -mt-64 pointer-events-none" />
     </footer>
   );
 };

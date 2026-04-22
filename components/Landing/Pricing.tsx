@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
 import { Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ const plans = [
     popular: false,
   },
   {
-    name: "Pro",
+    name: "Premium",
     price: "19",
     description: "Most popular for students",
     features: [
@@ -33,20 +32,20 @@ const plans = [
     cta: "Go Pro Now",
     popular: true,
   },
-  {
-    name: "Team",
-    price: "49",
-    description: "For study groups and schools",
-    features: [
-      "Everything in Pro",
-      "Group Management",
-      "Collaborative Quizzes",
-      "Dedicated Account Manager",
-      "Custom Branding",
-    ],
-    cta: "Contact Sales",
-    popular: false,
-  },
+  // {
+  //   name: "Team",
+  //   price: "49",
+  //   description: "For study groups and schools",
+  //   features: [
+  //     "Everything in Pro",
+  //     "Group Management",
+  //     "Collaborative Quizzes",
+  //     "Dedicated Account Manager",
+  //     "Custom Branding",
+  //   ],
+  //   cta: "Contact Sales",
+  //   popular: false,
+  // },
 ];
 
 const Pricing = () => {
@@ -73,7 +72,7 @@ const Pricing = () => {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={index}

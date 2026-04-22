@@ -4,7 +4,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, PlayCircle, Brain } from "lucide-react";
+import { ArrowRight, Sparkles, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Hero = () => {
@@ -62,14 +62,14 @@ const Hero = () => {
                 Start Learning Free
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="lg"
                 className="rounded-full px-8 py-7 text-lg font-semibold border-2"
               >
                 <PlayCircle className="mr-2 text-indigo-600" />
                 Watch Demo
-              </Button>
+              </Button> */}
             </motion.div>
 
             <motion.div

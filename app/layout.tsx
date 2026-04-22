@@ -80,9 +80,9 @@ export const metadata: Metadata = {
     icon: `/icons/logo.png`,
     apple: `/icons/logo.png`,
   },
-  authors: [{ name: "SmartStudy AI Team" }],
-  creator: "SmartStudy AI",
-  publisher: "SmartStudy AI",
+  authors: [{ name: "Nayon" }],
+  creator: "nrbnayon",
+  publisher: "Nayon Kanti Halder",
   formatDetection: {
     email: false,
     address: false,

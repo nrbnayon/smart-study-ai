@@ -1,4 +1,4 @@
-import { BookOpen, Check, Edit3, X, Crown } from "lucide-react";
+import { BookOpen, Check, X, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PlanFeature {

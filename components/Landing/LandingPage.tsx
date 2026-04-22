@@ -52,6 +52,7 @@ const LandingPage = () => {
                     src="https://i.pravatar.cc/150?img=32"
                     alt="Student"
                     fill
+                    sizes="64px"
                     className="object-cover"
                   />
                 </div>

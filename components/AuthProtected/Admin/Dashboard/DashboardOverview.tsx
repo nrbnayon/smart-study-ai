@@ -220,6 +220,7 @@ const DashboardOverview = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="User Registration Details"
+        showRange={false}
         data={
           selectedUser
             ? {

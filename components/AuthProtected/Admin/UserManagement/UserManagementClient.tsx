@@ -46,14 +46,18 @@ export default function UserManagementClient() {
   const getQueryParams = () => {
     const params: any = { page: currentPage };
     if (search) params.search = search;
-    if (activeFilter === "Premium") params.subscription_status = "monthly";
-    if (activeFilter === "Basic") params.subscription_status = "free";
+    if (activeFilter === "Premium") params.subscription_status = "yearly";
+    if (activeFilter === "Basic") params.subscription_status = "monthly";
     if (activeFilter === "Active") params.account_status = "verified";
     if (activeFilter === "Inactive") params.account_status = "not_verified";
     return params;
   };
 
-  const { data: response, isLoading, isFetching } = useGetAllUsersQuery(getQueryParams());
+  const {
+    data: response,
+    isLoading,
+    isFetching,
+  } = useGetAllUsersQuery(getQueryParams());
   const [deleteUser] = useDeleteUserMutation();
   const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserByIdMutation();
@@ -66,7 +70,9 @@ export default function UserManagementClient() {
       key: "id",
       header: "#",
       className: "text-secondary font-medium",
-      render: (id) => <span className="text-xs truncate w-16 inline-block">{id}</span>
+      render: (id) => (
+        <span className="text-xs truncate w-16 inline-block">{id}</span>
+      ),
     },
     {
       key: "name",
@@ -88,7 +94,9 @@ export default function UserManagementClient() {
               </span>
             )}
           </div>
-          <span className="font-semibold text-foreground">{name || "Unnamed"}</span>
+          <span className="font-semibold text-foreground">
+            {name || "Unnamed"}
+          </span>
         </div>
       ),
     },
@@ -147,11 +155,12 @@ export default function UserManagementClient() {
       key: "signup_date",
       header: "JOINED",
       className: "text-secondary",
-      render: (date: string) => new Date(date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+      render: (date: string) =>
+        new Date(date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
     },
   ];
 
@@ -207,20 +216,23 @@ export default function UserManagementClient() {
       label: "View",
       icon: <Eye size={18} />,
       onClick: (row: User) => handleOpenDetails(row),
-      className: "hover:bg-blue-50 text-primary hover:text-primary cursor-pointer",
+      className:
+        "hover:bg-blue-50 text-primary hover:text-primary cursor-pointer",
       variant: "primary" as const,
     },
     {
       label: "Edit",
       icon: <PencilLine size={18} />,
       onClick: (row: User) => handleOpenEdit(row),
-      className: "hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-pointer",
+      className:
+        "hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-pointer",
     },
     {
       label: "Delete",
       icon: <Trash2 size={18} />,
       onClick: (row: User) => handleOpenDelete(row),
-      className: "hover:bg-red-50 text-red-500 hover:text-red-600 cursor-pointer",
+      className:
+        "hover:bg-red-50 text-red-500 hover:text-red-600 cursor-pointer",
       variant: "danger" as const,
     },
   ];
@@ -314,7 +326,7 @@ export default function UserManagementClient() {
               headerClassName="!bg-[#F8FAFC] !text-secondary font-bold text-sm border-t border-b border-gray-100 uppercase tracking-wider"
               rowClassName={cn(
                 "hover:bg-gray-50/50 border-b border-gray-50 last:border-0 transition-colors",
-                isFetching && "opacity-50"
+                isFetching && "opacity-50",
               )}
             />
           )}
@@ -325,17 +337,25 @@ export default function UserManagementClient() {
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         title="User Details"
-        data={selectedUser ? {
-          Name: selectedUser.name,
-          Email: selectedUser.email,
-          "Subscription Status": selectedUser.subscription_status,
-          "Plan": selectedUser.current_plan,
-          "Account Status": selectedUser.account_status,
-          "Joined Date": new Date(selectedUser.signup_date).toLocaleDateString(),
-          "Start Date": selectedUser.start_date,
-          "Expiry Date": selectedUser.expiry_date,
-          avatar: selectedUser.image ? resolveMediaUrl(selectedUser.image) : null
-        } : null}
+        data={
+          selectedUser
+            ? {
+                Name: selectedUser.name,
+                Email: selectedUser.email,
+                "Subscription Status": selectedUser.subscription_status,
+                Plan: selectedUser.current_plan,
+                "Account Status": selectedUser.account_status,
+                "Joined Date": new Date(
+                  selectedUser.signup_date,
+                ).toLocaleDateString(),
+                "Start Date": selectedUser.start_date,
+                "Expiry Date": selectedUser.expiry_date,
+                avatar: selectedUser.image
+                  ? resolveMediaUrl(selectedUser.image)
+                  : null,
+              }
+            : null
+        }
       />
 
       <AddEditUserModal

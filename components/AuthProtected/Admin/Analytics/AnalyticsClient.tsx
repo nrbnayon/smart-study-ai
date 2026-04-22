@@ -1,46 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import DashboardHeader from "@/components/Shared/DashboardHeader";
 import { StatsCard } from "@/components/Shared/StatsCard";
 import { Users } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import {
-  userActivityData,
-  popularSubjectsData,
-} from "@/data/analyticsDummyData";
 import { cn } from "@/lib/utils";
+import {
+  useGetPopularSubjectsQuery,
+  useGetActiveUsersAnalyticsQuery,
+} from "@/redux/services/analyticsApi";
+import { useGetAllUsersQuery } from "@/redux/services/userApi";
+
+const AnalyticsChart = dynamic(() => import("./AnalyticsChart"), { 
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-slate-50 animate-pulse rounded-2xl" />
+});
 
 export default function AnalyticsClient() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d">("7d");
 
-  // Create extended 30-day dummy data mathematically based on 7d
-  const extendedData = [
-    { date: "Jan 28", activeUsers: 220 },
-    { date: "Feb 1", activeUsers: 260 },
-    { date: "Feb 5", activeUsers: 240 },
-    { date: "Feb 10", activeUsers: 290 },
-    { date: "Feb 15", activeUsers: 330 },
-    ...userActivityData,
-  ];
+  const { data: usersResponse, isLoading: isUsersLoading } = useGetAllUsersQuery({});
+  const { data: popularSubjects, isLoading: isSubjectsLoading } = useGetPopularSubjectsQuery();
+  const { data: activeUsersData, isLoading: isActiveUsersLoading } = useGetActiveUsersAnalyticsQuery();
 
-  const [mounted, setMounted] = useState(false);
+  const totalUsers = usersResponse?.count || 0;
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Process chart data
+  const rawChartData = activeUsersData?.daily_breakdown || [];
+  const processedChartData = rawChartData.map((item) => ({
+    date: new Date(item.day).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    }),
+    activeUsers: item.active_users,
+  }));
 
-  const chartData = timeRange === "7d" ? userActivityData : extendedData;
+  // Process subjects data
+  const maxScanCount = Math.max(...(popularSubjects?.map((s) => s.scan_count) || [1]), 1);
+  const processedSubjects = (popularSubjects || []).map((s, index) => ({
+    rank: index + 1,
+    name: s.subject.charAt(0).toUpperCase() + s.subject.slice(1),
+    views: s.scan_count,
+    percent: (s.scan_count / maxScanCount) * 100,
+  }));
 
-  if (!mounted) {
+  const isLoading = isUsersLoading || isSubjectsLoading || isActiveUsersLoading;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col pb-10">
         <DashboardHeader title="Analytics" />
@@ -66,7 +73,7 @@ export default function AnalyticsClient() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatsCard
             title="Total Users"
-            value="25"
+            value={totalUsers.toString()}
             icon={Users}
             iconBgColor="#EEF2FF"
             iconColor="#6366F1"
@@ -113,56 +120,7 @@ export default function AnalyticsClient() {
               </div>
             </div>
 
-            <div className="h-[300px] w-full mt-auto min-h-[300px] min-w-0">
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-                minWidth={0}
-                minHeight={300}
-              >
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 5, right: 30, left: -20, bottom: 5 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#F1F5F9"
-                  />
-                  <XAxis
-                    dataKey="date"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#9CA3AF", fontSize: 12, fontWeight: 500 }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#9CA3AF", fontSize: 12, fontWeight: 500 }}
-                    ticks={[0, 150, 300, 450, 600]}
-                    domain={[0, 600]}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "12px",
-                      border: "none",
-                      boxShadow: "0px 4px 24px rgba(0,0,0,0.08)",
-                      fontWeight: 600,
-                    }}
-                    cursor={{ stroke: "#E2E8F0", strokeWidth: 2 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="activeUsers"
-                    stroke="#6366F1"
-                    strokeWidth={3}
-                    dot={{ r: 4, strokeWidth: 2, fill: "#6366F1" }}
-                    activeDot={{ r: 6, strokeWidth: 0, fill: "#4F46E5" }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <AnalyticsChart data={processedChartData} />
           </div>
 
           {/* Popular Subjects */}
@@ -177,9 +135,9 @@ export default function AnalyticsClient() {
             </div>
 
             <div className="flex flex-col gap-6 overflow-y-auto pr-2 scrollbar-hide py-1">
-              {popularSubjectsData.map((subject, index) => {
+              {processedSubjects.map((subject, index) => {
                 // Interpolate from #6366F1 (99, 102, 241) to #C7D2FE (199, 210, 254)
-                const total = popularSubjectsData.length;
+                const total = processedSubjects.length;
                 const ratio = index / Math.max(1, total - 1);
                 const r = Math.round(99 + ratio * (199 - 99));
                 const g = Math.round(102 + ratio * (210 - 102));

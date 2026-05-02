@@ -238,3 +238,8 @@
 [data-slot="input-otp-slot"]:focus-within {
   border-color: var(--primary);
 }
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

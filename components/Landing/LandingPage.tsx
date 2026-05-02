@@ -9,6 +9,8 @@ import Pricing from "./Pricing";
 import Footer from "./Footer";
 import { motion, useScroll, useSpring } from "framer-motion";
 import Image from "next/image";
+import ChatBot from "./ChatBot";
+
 
 const LandingPage = () => {
   const { scrollYProgress } = useScroll();
@@ -97,6 +99,7 @@ const LandingPage = () => {
       </main>
 
       <Footer />
+      <ChatBot />
     </div>
   );
 };

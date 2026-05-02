@@ -22,6 +22,7 @@ export const settingsApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: formData,
       }),
+      transformResponse: (response: AdminProfileApiResponse) => response.data,
       invalidatesTags: ["AdminProfile"],
     }),
     resetAdminPassword: builder.mutation<any, any>({
@@ -44,6 +45,7 @@ export const settingsApi = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: any) => response.data,
       invalidatesTags: ["Terms"],
     }),
     updateTermsSection: builder.mutation<TermsSection, { id: string; data: any }>({
@@ -52,6 +54,7 @@ export const settingsApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      transformResponse: (response: any) => response.data,
       invalidatesTags: ["Terms"],
     }),
     deleteTermsSection: builder.mutation<void, string>({

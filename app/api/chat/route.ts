@@ -1,11 +1,91 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-
-export const runtime = 'edge';
+// @ts-ignore
+const pdf = require('pdf-parse');
+// @ts-ignore
+const mammoth = require('mammoth');
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    let messages = [];
+    
+    // Check if the request is multipart/form-data
+    const contentType = req.headers.get('content-type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData();
+      const messagesStr = formData.get('messages') as string;
+      if (messagesStr) {
+        messages = JSON.parse(messagesStr);
+      }
+      
+      const files = formData.getAll('files') as File[];
+      
+      let additionalText = "";
+      const imageContents: any[] = [];
+      
+      for (const file of files) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        
+        if (file.type === 'application/pdf') {
+          try {
+            const pdfData = await pdf(buffer);
+            additionalText += `\n\n--- Content from PDF (${file.name}) ---\n${pdfData.text}\n`;
+          } catch (e) {
+            console.error("PDF parse error", e);
+          }
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/msword') {
+          try {
+            const result = await mammoth.extractRawText({ buffer });
+            additionalText += `\n\n--- Content from Word Document (${file.name}) ---\n${result.value}\n`;
+          } catch (e) {
+            console.error("Mammoth docx parse error", e);
+          }
+        } else if (file.type.startsWith('text/')) {
+          const text = new TextDecoder().decode(buffer);
+          additionalText += `\n\n--- Content from Text File (${file.name}) ---\n${text}\n`;
+        } else if (file.type.startsWith('image/')) {
+          // Convert to base64 for image processing
+          const base64 = buffer.toString('base64');
+          const dataUrl = `data:${file.type};base64,${base64}`;
+          imageContents.push({
+            type: 'image_url',
+            image_url: { url: dataUrl }
+          });
+        }
+      }
+      
+      // Modify the last user message
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        const lastMessage = messages[messages.length - 1];
+        let originalContent = lastMessage.content;
+        
+        if (typeof originalContent === 'string') {
+          originalContent = [
+            { type: 'text', text: originalContent + additionalText }
+          ];
+        } else if (Array.isArray(originalContent)) {
+          // Find text content and append
+          const textItem = originalContent.find(item => item.type === 'text');
+          if (textItem) {
+            textItem.text += additionalText;
+          } else {
+            originalContent.push({ type: 'text', text: additionalText });
+          }
+        }
+        
+        if (imageContents.length > 0) {
+          if (typeof originalContent === 'string') {
+             originalContent = [{ type: 'text', text: originalContent }];
+          }
+          originalContent.push(...imageContents);
+        }
+        
+        lastMessage.content = originalContent;
+      }
+      
+    } else {
+      const body = await req.json();
+      messages = body.messages || [];
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

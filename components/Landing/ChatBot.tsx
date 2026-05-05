@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Loader2, Bot, User, RefreshCw, Sparkles } from "lucide-react";
+import { X, Send, Loader2, Bot, User, RefreshCw, Sparkles, Paperclip, FileText, Image as ImageIcon, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  files?: { name: string; type: string; url?: string }[];
 }
 
 const ChatBot = () => {
@@ -22,6 +23,8 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const targetMessageRef = useRef("");
 
@@ -67,22 +70,77 @@ const ChatBot = () => {
     return () => clearInterval(interval);
   }, [isTyping, messages.length]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (selectedFiles.length + files.length > 3) {
+      toast.error("Maximum 3 files allowed");
+      return;
+    }
 
-    const userMessage: Message = { role: "user", content: input };
+    // Filter for images, pdf, and docx
+    const validFiles = files.filter((file) => {
+      const isValid =
+        file.type.startsWith("image/") ||
+        file.type === "application/pdf" ||
+        file.type ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        file.type === "application/msword" ||
+        file.type.startsWith("text/");
+
+      if (!isValid) {
+        toast.error(`Invalid file type: ${file.name}`);
+      }
+      return isValid;
+    });
+
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSend = async () => {
+    if ((!input.trim() && selectedFiles.length === 0) || isLoading) return;
+
+    const currentFiles = [...selectedFiles];
+    const userMessage: Message = {
+      role: "user",
+      content: input,
+      files: currentFiles.map((f) => ({
+        name: f.name,
+        type: f.type,
+        url: f.type.startsWith("image/") ? URL.createObjectURL(f) : undefined,
+      })),
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setSelectedFiles([]);
     setIsLoading(true);
     setIsTyping(true);
     targetMessageRef.current = "";
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-      });
+      let response;
+      if (currentFiles.length > 0) {
+        const formData = new FormData();
+        formData.append("messages", JSON.stringify([...messages, userMessage]));
+        currentFiles.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        response = await fetch("/api/chat", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: [...messages, userMessage] }),
+        });
+      }
 
       if (!response.ok) throw new Error("Failed to fetch");
 
@@ -219,9 +277,9 @@ const ChatBot = () => {
                   </p>
                   <div className="grid grid-cols-1 gap-2 w-full mt-4">
                     {[
-                      "How do I generate a quiz?",
-                      "What are the pricing plans?",
-                      "Can I share quizzes with friends?",
+                      "Can you analyze this PDF for me?",
+                      "Summarize this Word document",
+                      "What's in this image?",
                     ].map((suggestion) => (
                       <button
                         key={suggestion}
@@ -311,6 +369,44 @@ const ChatBot = () => {
                       >
                         {msg.content}
                       </ReactMarkdown>
+
+                      {msg.files && msg.files.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {msg.files.map((file, idx) => (
+                            <div
+                              key={idx}
+                              className={cn(
+                                "flex items-center gap-2 p-2 rounded-lg text-[10px] font-medium border",
+                                msg.role === "user"
+                                  ? "bg-white/10 border-white/20 text-white"
+                                  : "bg-indigo-50 border-indigo-100 text-indigo-700"
+                              )}
+                            >
+                              {file.type.startsWith("image/") ? (
+                                <div className="flex flex-col gap-1">
+                                  {file.url && (
+                                    <img
+                                      src={file.url}
+                                      alt={file.name}
+                                      className="max-w-[120px] max-h-[120px] rounded object-cover"
+                                    />
+                                  )}
+                                  <span className="truncate max-w-[100px]">
+                                    {file.name}
+                                  </span>
+                                </div>
+                              ) : (
+                                <>
+                                  <FileText size={12} />
+                                  <span className="truncate max-w-[100px]">
+                                    {file.name}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       {isTyping && i === messages.length - 1 && (
                         <span className="inline-block w-1.5 h-4 ml-0.5 bg-indigo-400 animate-pulse align-middle" />
                       )}
@@ -337,6 +433,33 @@ const ChatBot = () => {
 
             {/* Input */}
             <div className="p-4 bg-white border-t border-indigo-50">
+              {/* File Previews */}
+              {selectedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {selectedFiles.map((file, idx) => (
+                    <div
+                      key={idx}
+                      className="group relative flex items-center gap-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100"
+                    >
+                      {file.type.startsWith("image/") ? (
+                        <ImageIcon size={14} className="text-indigo-600" />
+                      ) : (
+                        <FileText size={14} className="text-indigo-600" />
+                      )}
+                      <span className="text-[10px] font-medium text-indigo-700 max-w-[80px] truncate">
+                        {file.name}
+                      </span>
+                      <button
+                        onClick={() => removeFile(idx)}
+                        className="p-0.5 rounded-full hover:bg-indigo-200 text-indigo-600"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -344,18 +467,36 @@ const ChatBot = () => {
                 }}
                 className="relative flex items-center gap-2"
               >
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask something..."
-                  className="flex-1 pr-12 rounded-2xl border-indigo-100 focus:ring-indigo-500 focus:border-indigo-500 h-12"
-                  disabled={isLoading}
-                />
+                <div className="flex-1 relative">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask something..."
+                    className="w-full pl-10 pr-12 rounded-2xl border-indigo-100 focus:ring-indigo-500 focus:border-indigo-500 h-12"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading || selectedFiles.length >= 3}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 text-indigo-400 hover:text-indigo-600 disabled:opacity-50 transition-colors"
+                  >
+                    <Paperclip size={18} />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx,.txt"
+                  />
+                </div>
                 <Button
                   type="submit"
                   size="icon"
-                  disabled={!input.trim() || isLoading}
-                  className="absolute right-1.5 top-1.5 w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 transition-all disabled:opacity-50"
+                  disabled={(!input.trim() && selectedFiles.length === 0) || isLoading}
+                  className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 transition-all disabled:opacity-50 shrink-0"
                 >
                   {isLoading ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -365,7 +506,7 @@ const ChatBot = () => {
                 </Button>
               </form>
               <p className="text-[10px] text-center text-gray-400 mt-2">
-                Powered by SmartStudy AI
+                Powered by SmartStudy AI • Max 3 files (PDF, Doc, Image)
               </p>
             </div>
           </motion.div>

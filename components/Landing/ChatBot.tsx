@@ -228,7 +228,7 @@ const ChatBot = () => {
                   <Bot size={24} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm">SmartStudy AI Assistant</h3>
+                  <h3 className="font-bold text-sm">Quizquestion AI Assistant</h3>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-[10px] text-indigo-100">

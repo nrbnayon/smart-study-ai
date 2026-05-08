@@ -39,7 +39,7 @@ const Navbar = () => {
         <Link href="/" className="flex items-center group">
           <Image
             src="/icons/logo.png"
-            alt="SmartStudy AI"
+            alt="Quiz Question AI"
             width={150}
             height={40}
             className="group-hover:scale-105 transition-transform w-auto h-10"

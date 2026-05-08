@@ -45,7 +45,7 @@ const LandingPage = () => {
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center max-w-4xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold font-clash text-white mb-8 leading-tight">
-                &quot;SmartStudy AI changed the way I prepare for exams. I went
+                &quot;Quiz Question AI changed the way I prepare for exams. I went
                 from a B to an A in just one month!&quot;
               </h2>
               <div className="flex flex-col items-center">

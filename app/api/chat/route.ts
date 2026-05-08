@@ -98,11 +98,11 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `You are a helpful assistant for SmartStudy AI. 
-            SmartStudy AI is an AI-powered learning platform that helps students master any subject.
+            content: `You are a helpful assistant for Quiz Question AI. 
+            Quiz Question AI is an AI-powered learning platform that helps students master any subject.
             
             About the Project:
-            SmartStudy AI transforms study materials into interactive quizzes, tracks progress with smart analytics, and helps students learn 2x faster.
+            Quiz Question AI transforms study materials into interactive quizzes, tracks progress with smart analytics, and helps students learn 2x faster.
             
             Key Features:
             - Instant Quiz Generation: Users can upload PDF, documents, or text, and the AI generates relevant quizzes in seconds.

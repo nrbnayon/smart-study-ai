@@ -206,21 +206,30 @@ const ChatBot = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-      {/* Chat Popup */}
+    <div className="fixed bottom-10 right-10 z-[100]">
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 20,
-              scale: 0.95,
-              transformOrigin: "bottom right",
-            }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="mb-4 w-[90vw] sm:w-[400px] h-[600px] max-h-[80vh] bg-white rounded-3xl shadow-2xl border border-indigo-100 flex flex-col overflow-hidden"
-          >
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm cursor-pointer"
+            />
+
+            {/* Chat Modal */}
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.9,
+                y: 20,
+              }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl h-[85vh] bg-white rounded-3xl shadow-2xl border border-indigo-100 flex flex-col overflow-hidden"
+            >
             {/* Header */}
             <div className="p-4 bg-indigo-600 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -228,7 +237,7 @@ const ChatBot = () => {
                   <Bot size={24} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm">Quizquestion AI Assistant</h3>
+                  <h3 className="font-bold text-sm">Quiz Question AI</h3>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-[10px] text-indigo-100">
@@ -272,7 +281,7 @@ const ChatBot = () => {
                     Hello! I&lsquo;m your AI tutor.
                   </h4>
                   <p className="text-sm text-gray-500 max-w-[200px]">
-                    Ask me anything about SmartStudy AI or how I can help you
+                    Ask me anything about Quiz Question AI or how I can help you
                     learn better.
                   </p>
                   <div className="grid grid-cols-1 gap-2 w-full mt-4">
@@ -506,12 +515,13 @@ const ChatBot = () => {
                 </Button>
               </form>
               <p className="text-[10px] text-center text-gray-400 mt-2">
-                Powered by SmartStudy AI • Max 3 files (PDF, Doc, Image)
+                Powered by Quiz Question AI • Max 3 files (PDF, Doc, Image)
               </p>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
 
       <motion.button
         whileHover={{

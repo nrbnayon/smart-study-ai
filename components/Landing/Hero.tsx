@@ -46,7 +46,7 @@ const Hero = () => {
             >
               Transform your study materials into interactive quizzes, track
               your progress with smart analytics, and learn 2x faster with
-              SmartStudy AI.
+              Quiz Question AI.
             </motion.p>
 
             <motion.div

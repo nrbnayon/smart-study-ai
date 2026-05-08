@@ -18,7 +18,7 @@ const Footer = () => {
             <Link href="/" className="inline-block group transition-all duration-300">
               <Image
                 src="/icons/logo.png"
-                alt="SmartStudy AI"
+                alt="Quiz Question AI"
                 width={160}
                 height={40}
                 style={{ width: "auto", height: "40px" }}
@@ -101,7 +101,7 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-sm">
           <p className="text-slate-500 font-medium order-2 md:order-1">
-            © {new Date().getFullYear()} SmartStudy AI. All rights reserved.
+            © {new Date().getFullYear()} Quiz Question AI. All rights reserved.
           </p>
           
           <div className="flex items-center gap-8 order-1 md:order-2">

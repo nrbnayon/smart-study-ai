@@ -61,11 +61,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   title: {
-    default: "SmartStudy AI | #1 AI Quiz Generator & Learning Platform",
-    template: "%s | SmartStudy AI",
+    default: "Quiz Question AI | #1 AI Quiz Generator & Learning Platform",
+    template: "%s | Quiz Question AI",
   },
   description:
-    "Master any subject with AI-powered quizzes. Upload PDFs, generate questions, and track your progress with SmartStudy AI.",
+    "Master any subject with AI-powered quizzes. Upload PDFs, generate questions, and track your progress with Quiz Question AI.",
   keywords: [
     "AI quiz generator",
     "smart study",
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
     "quiz maker",
     "study assistant",
     "adaptive learning",
-    "SmartStudy AI",
+    "Quiz Question AI",
   ],
   icons: {
     icon: `/icons/logo.png`,
@@ -103,8 +103,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "SmartStudy AI",
-    title: "SmartStudy AI | AI-Powered Learning for Everyone",
+    siteName: "Quiz Question AI",
+    title: "Quiz Question AI | AI-Powered Learning for Everyone",
     description:
       "Transform your notes into quizzes instantly. The most advanced AI learning platform for students and professionals.",
     images: [
@@ -112,13 +112,13 @@ export const metadata: Metadata = {
         url: `https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80&w=1200`,
         width: 1200,
         height: 630,
-        alt: "SmartStudy AI - AI Quiz Platform",
+        alt: "Quiz Question AI - AI Quiz Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SmartStudy AI | Master Your Studies with AI",
+    title: "Quiz Question AI | Master Your Studies with AI",
     description:
       "The most comprehensive AI learning platform for quiz generation and progress tracking.",
     images: [`https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80&w=1200`],
@@ -145,7 +145,7 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: process.env.NEXT_PUBLIC_APP_NAME || "SmartStudy AI",
+    name: process.env.NEXT_PUBLIC_APP_NAME || "Quiz Question AI",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     description:
       "Master any subject with AI-powered quizzes. The most advanced study platform.",

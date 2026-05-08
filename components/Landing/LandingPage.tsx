@@ -36,7 +36,7 @@ const LandingPage = () => {
         <HowItWorks />
 
         {/* Testimonial / Social Proof Section */}
-        <section className="py-20 bg-indigo-600 overflow-hidden relative">
+        {/* <section className="py-20 bg-indigo-600 overflow-hidden relative">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white rounded-full" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] border border-white rounded-full opacity-50" />
@@ -65,7 +65,7 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         <Pricing />
 

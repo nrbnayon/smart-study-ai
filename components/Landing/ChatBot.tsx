@@ -142,7 +142,17 @@ const ChatBot = () => {
         });
       }
 
-      if (!response.ok) throw new Error("Failed to fetch");
+      if (!response.ok) {
+        let errorMsg = "Failed to fetch";
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorData.message || errorMsg;
+        } catch (e) {
+          // If not JSON, use the status text
+          errorMsg = response.statusText || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();

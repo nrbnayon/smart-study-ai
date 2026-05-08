@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-// @ts-ignore
-const pdf = require('pdf-parse');
-// @ts-ignore
-const mammoth = require('mammoth');
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'OpenAI API Key is not configured on the server.' }, { status: 500 });
+    }
+
     let messages = [];
     
     // Check if the request is multipart/form-data
@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
         
         if (file.type === 'application/pdf') {
           try {
+            // Lazy load pdf-parse
+            const pdf = require('pdf-parse');
             const pdfData = await pdf(buffer);
             additionalText += `\n\n--- Content from PDF (${file.name}) ---\n${pdfData.text}\n`;
           } catch (e) {
@@ -34,6 +36,8 @@ export async function POST(req: NextRequest) {
           }
         } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/msword') {
           try {
+            // Lazy load mammoth
+            const mammoth = require('mammoth');
             const result = await mammoth.extractRawText({ buffer });
             additionalText += `\n\n--- Content from Word Document (${file.name}) ---\n${result.value}\n`;
           } catch (e) {
@@ -130,8 +134,14 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(error, { status: response.status });
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        const text = await response.text();
+        errorData = { error: text || 'Unknown error from OpenAI' };
+      }
+      return NextResponse.json(errorData, { status: response.status });
     }
 
     return new Response(response.body, {

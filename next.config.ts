@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "api.quizquestion.ai",
+      },
+      {
+        protocol: "https",
         hostname: "images.unsplash.com",
       },
       {
@@ -62,8 +66,8 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https: http://localhost:5000 http://10.10.12.11:5000 https://smart-s-ai.netlify.app https://vercel.com https://images.unsplash.com",
-              "connect-src 'self' https: http://localhost:5000 http://10.10.12.11:5000 https://smart-s-ai.netlify.app ws://10.10.12.11:3000 https://vercel.live",
+              "img-src 'self' data: blob: https: http://localhost:5000 http://10.10.12.11:5000 https://smart-s-ai.netlify.app https://vercel.com https://images.unsplash.com https://api.quizquestion.ai",
+              "connect-src 'self' https: http://localhost:5000 http://10.10.12.11:5000 https://smart-s-ai.netlify.app ws://10.10.12.11:3000 https://vercel.live https://api.quizquestion.ai",
               "media-src 'self'",
               "object-src 'none'",
               "frame-src 'self' https://vercel.live",
